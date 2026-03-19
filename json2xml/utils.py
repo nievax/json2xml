@@ -1,5 +1,4 @@
 """Utility methods for converting XML data to dictionary from various sources."""
-# test comment
 import json
 
 import urllib3
