@@ -1,13 +1,154 @@
-from __future__ import annotations
+"""
+    function dicttoxml (see below) converts a python object into XML.
 
+    :param dict obj:
+        dictionary
+
+    :param bool root:
+        Default is True
+        specifies wheter the output is wrapped in an XML root element
+
+    :param custom_root:
+        Default is 'root'
+        allows you to specify a custom root element.
+
+    :param bool ids:
+        Default is False
+        specifies whether elements get unique ids.
+
+    :param bool attr_type:
+        Default is True
+        specifies whether elements get a data type attribute.
+
+    :param bool item_wrap:
+        Default is True
+        specifies whether to nest each item in an array in <item/>.
+
+        Example if True:
+
+        ..code-block:: python
+
+            data = {'bike': ['blue', 'green']}
+
+        .. code-block:: xml
+
+            <bike>
+            <item>blue</item>
+            <item>green</item>
+            </bike>
+
+        Example if False:
+
+        ..code-block:: python
+
+            data = {'bike': ['blue', 'green']}
+
+        ..code-block:: xml
+
+            <bike>blue</bike>
+            <bike>green</bike>'
+
+    :param item_func:
+        items in a list. Default is 'item'
+        specifies what function should generate the element name for
+
+    :param bool cdata:
+        Default is False
+        specifies whether string values should be wrapped in CDATA sections.
+
+    :param xml_namespaces:
+        is a dictionary where key is xmlns prefix and value the urn, Default is {}. Example:
+
+        .. code-block:: python
+
+            { 'flex': 'http://www.w3.org/flex/flexBase', 'xsl': "http://www.w3.org/1999/XSL/Transform"}
+
+        results in
+
+        .. code-block:: xml
+
+            <root xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:flex="http://www.w3.org/flex/flexBase">
+
+    :param bool list_headers:
+        Default is False
+        Repeats the header for every element in a list.
+        
+        Example if True:
+
+        .. code-block:: python
+
+            "Bike": [
+            {'frame_color': 'red'},
+            {'frame_color': 'green'}
+            ]}
+
+        results in
+
+        .. code-block:: xml
+
+            <Bike><frame_color>red</frame_color></Bike>
+            <Bike><frame_color>green</frame_color></Bike>
+
+    :param bool xpath_format:
+        Default is False
+        When True, produces XPath 3.1 json-to-xml compliant output as specified
+        by W3C (https://www.w3.org/TR/xpath-functions-31/#func-json-to-xml).
+        Uses type-based element names (map, array, string, number, boolean, null)
+        with key attributes and the http://www.w3.org/2005/xpath-functions namespace.
+
+        Example:
+
+        .. code-block:: python
+
+            {"name": "John", "age": 30}
+
+        results in
+
+        .. code-block:: xml
+
+            <map xmlns="http://www.w3.org/2005/xpath-functions">
+              <string key="name">John</string>
+              <number key="age">30</number>
+            </map>
+
+    Dictionaries-keys with special char '@' has special meaning:
+    @attrs: This allows custom xml attributes:
+
+    .. code-block:: python
+
+        {'@attr':{'a':'b'}, 'x':'y'}
+
+    results in
+
+    .. code-block:: xml
+
+        <root a="b"><x>y</x></root>
+
+    @flat: If a key ends with @flat (or dict contains key '@flat'),
+    encapsulating node is omitted. Similar to item_wrap.
+    @val: @attrs requires complex dict type. If primitive type should be used, then @val is used as key.
+    To add custom xml-attributes on a list {'list': [4, 5, 6]}, you do this:
+
+    .. code-block:: python
+
+        {'list': {'@attrs': {'a':'b','c':'d'}, '@val': [4, 5, 6]}
+
+    which results in
+
+    .. code-block:: xml
+
+        <list a="b" c="d"><item>4</item><item>5</item><item>6</item></list>
+
+    """
+from __future__         import annotations
 import datetime
 import logging
 import numbers
-from collections.abc import Callable, Sequence
-from decimal import Decimal
-from fractions import Fraction
-from random import SystemRandom
-from typing import Any, Union, cast
+from collections.abc    import Callable, Sequence
+from decimal            import Decimal
+from fractions          import Fraction
+from random             import SystemRandom
+from typing             import Any, Union, cast
 
 from defusedxml.minidom import parseString
 
@@ -15,7 +156,6 @@ from defusedxml.minidom import parseString
 
 # Set up logging
 LOG = logging.getLogger("dicttoxml")
-
 
 def make_id(element: str, start: int = 100000, end: int = 999999) -> str:
     """
@@ -31,7 +171,6 @@ def make_id(element: str, start: int = 100000, end: int = 999999) -> str:
     """
     safe_random = SystemRandom()
     return f"{element}_{safe_random.randint(start, end)}"
-
 
 def get_unique_id(element: str) -> str:
     """
@@ -54,7 +193,6 @@ def get_unique_id(element: str) -> str:
             this_id = make_id(element)
     return ids[-1]
 
-
 ELEMENT = Union[
     str,
     int,
@@ -70,7 +208,6 @@ ELEMENT = Union[
     None,
     dict[str, Any],
 ]
-
 
 def get_xml_type(val: ELEMENT) -> str:
     """
@@ -101,7 +238,6 @@ def get_xml_type(val: ELEMENT) -> str:
         return "null"
     return type(val).__name__
 
-
 def escape_xml(s: str | int | float | numbers.Number) -> str:
     """
     Escape a string for use in XML.
@@ -121,7 +257,6 @@ def escape_xml(s: str | int | float | numbers.Number) -> str:
         s = s.replace(">", "&gt;")
     return str(s)
 
-
 def make_attrstring(attr: dict[str, Any]) -> str:
     """
     Create a string of XML attributes from a dictionary.
@@ -134,7 +269,6 @@ def make_attrstring(attr: dict[str, Any]) -> str:
     """
     attrstring = " ".join([f'{k}="{escape_xml(v)}"' for k, v in attr.items()])
     return f'{" " if attrstring != "" else ""}{attrstring}'
-
 
 def key_is_valid_xml(key: str) -> bool:
     """
@@ -152,7 +286,6 @@ def key_is_valid_xml(key: str) -> bool:
         return True
     except Exception:  # minidom does not implement exceptions well
         return False
-
 
 def make_valid_xml_name(key: str, attr: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     """Tests an XML name and fixes it if invalid"""
@@ -182,21 +315,18 @@ def make_valid_xml_name(key: str, attr: dict[str, Any]) -> tuple[str, dict[str, 
     key = "key"
     return key, attr
 
-
 def wrap_cdata(s: str | int | float | numbers.Number) -> str:
     """Wraps a string into CDATA sections"""
     s = str(s).replace("]]>", "]]]]><![CDATA[>")
     return "<![CDATA[" + s + "]]>"
 
-
 def default_item_func(parent: str) -> str:
+    '''docstring'''
     return "item"
-
 
 # XPath 3.1 json-to-xml conversion
 # Spec: https://www.w3.org/TR/xpath-functions-31/#json-to-xml-mapping
 XPATH_FUNCTIONS_NS = "http://www.w3.org/2005/xpath-functions"
-
 
 def get_xpath31_tag_name(val: Any) -> str:
     """
@@ -225,7 +355,6 @@ def get_xpath31_tag_name(val: Any) -> str:
     if isinstance(val, Sequence):
         return "array"
     return "string"
-
 
 def convert_to_xpath31(obj: Any, parent_key: str | None = None) -> str:
     """
@@ -264,7 +393,6 @@ def convert_to_xpath31(obj: Any, parent_key: str | None = None) -> str:
         return f"<array{key_attr}>{children}</array>"
 
     return f"<string{key_attr}>{escape_xml(str(obj))}</string>"
-
 
 def convert(
     obj: ELEMENT,
@@ -318,11 +446,10 @@ def convert(
 
     raise TypeError(f"Unsupported data type: {obj} ({type(obj).__name__})")
 
-
 def is_primitive_type(val: Any) -> bool:
+    '''docstring'''
     t = get_xml_type(val)
     return t in {"str", "int", "float", "bool", "number", "null"}
-
 
 def dict2xml_str(
     attr_type: bool,
@@ -332,7 +459,7 @@ def dict2xml_str(
     cdata: bool,
     item_name: str,
     item_wrap: bool,
-    parentIsList: bool,
+    parent_is_list: bool,
     parent: str = "",
     list_headers: bool = False,
 ) -> str:
@@ -358,18 +485,17 @@ def dict2xml_str(
             rawitem, ids, attr_type, item_func, cdata, item_wrap, item_name, list_headers=list_headers
         )
 
-    if parentIsList and list_headers:
+    if parent_is_list and list_headers:
         if len(val_attr) > 0 and not item_wrap:
             attrstring = make_attrstring(val_attr)
             return f"<{parent}{attrstring}>{subtree}</{parent}>"
         return f"<{parent}>{subtree}</{parent}>"
-    elif item.get("@flat", False) or (parentIsList and not item_wrap):
+    elif item.get("@flat", False) or (parent_is_list and not item_wrap):
         return subtree
 
     attrstring = make_attrstring(val_attr)
 
     return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
-
 
 def list2xml_str(
     attr_type: bool,
@@ -381,6 +507,7 @@ def list2xml_str(
     item_wrap: bool,
     list_headers: bool = False,
 ) -> str:
+    '''docstring'''
     ids: list[str] = []  # initialize list of unique ids
     if attr_type:
         attr["type"] = get_xml_type(item)
@@ -405,7 +532,6 @@ def list2xml_str(
         return subtree
     attrstring = make_attrstring(attr)
     return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
-
 
 def convert_dict(
     obj: dict[str, Any],
@@ -482,7 +608,6 @@ def convert_dict(
 
     return "".join(output)
 
-
 def convert_list(
     items: Sequence[Any],
     ids: list[str] | None,
@@ -553,7 +678,7 @@ def convert_list(
                     cdata=cdata,
                     item_name=item_name,
                     item_wrap=item_wrap,
-                    parentIsList=True,
+                    parent_is_list=True,
                     parent=parent,
                     list_headers=list_headers
                 )
@@ -580,7 +705,6 @@ def convert_list(
             raise TypeError(f"Unsupported data type: {item} ({type(item).__name__})")
     return "".join(output)
 
-
 def convert_kv(
     key: str,
     val: str | int | float | numbers.Number | datetime.datetime | datetime.date,
@@ -602,7 +726,6 @@ def convert_kv(
     attr_string = make_attrstring(attr)
     return f"<{key}{attr_string}>{wrap_cdata(val) if cdata else escape_xml(val)}</{key}>"
 
-
 def convert_bool(
     key: str, val: bool, attr_type: bool, attr: dict[str, Any] | None = None, cdata: bool = False
 ) -> str:
@@ -615,7 +738,6 @@ def convert_bool(
         attr["type"] = get_xml_type(val)
     attr_string = make_attrstring(attr)
     return f"<{key}{attr_string}>{str(val).lower()}</{key}>"
-
 
 def convert_none(
     key: str, attr_type: bool, attr: dict[str, Any] | None = None, cdata: bool = False
@@ -630,199 +752,66 @@ def convert_none(
     attr_string = make_attrstring(attr)
     return f"<{key}{attr_string}></{key}>"
 
-
 def dicttoxml(
-    obj: ELEMENT,
-    root: bool = True,
-    custom_root: str = "root",
-    ids: list[int] | None = None,
-    attr_type: bool = True,
-    item_wrap: bool = True,
-    item_func: Callable[[str], str] = default_item_func,
-    cdata: bool = False,
-    xml_namespaces: dict[str, Any] = {},
-    list_headers: bool = False,
-    xpath_format: bool = False,
+    obj:            ELEMENT,
+    xpath_format:   bool                    = False,
+    root:           bool                    = True,
+    custom_root:    str                     = "root",
+    ids:            list[int] | None        = None,
+    attr_type:      bool                    = True,
+    item_wrap:      bool                    = True,
+    item_func:      Callable[[str], str]    = default_item_func,
+    cdata:          bool                    = False,
+    xml_namespaces: dict[str, Any] | None   = None,
+    list_headers:   bool                    = False,
+    prolog:         str                     = '<?xml version="1.0" encoding="UTF-8" ?>'
 ) -> bytes:
-    """
-    Converts a python object into XML.
-
-    :param dict obj:
-        dictionary
-
-    :param bool root:
-        Default is True
-        specifies wheter the output is wrapped in an XML root element
-
-    :param custom_root:
-        Default is 'root'
-        allows you to specify a custom root element.
-
-    :param bool ids:
-        Default is False
-        specifies whether elements get unique ids.
-
-    :param bool attr_type:
-        Default is True
-        specifies whether elements get a data type attribute.
-
-    :param bool item_wrap:
-        Default is True
-        specifies whether to nest items in array in <item/> Example if True
-
-        ..code-block:: python
-
-            data = {'bike': ['blue', 'green']}
-
-        .. code-block:: xml
-
-            <bike>
-            <item>blue</item>
-            <item>green</item>
-            </bike>
-
-        Example if False
-
-        ..code-block:: python
-
-            data = {'bike': ['blue', 'green']}
-
-        ..code-block:: xml
-
-            <bike>blue</bike>
-            <bike>green</bike>'
-
-    :param item_func:
-        items in a list. Default is 'item'
-        specifies what function should generate the element name for
-
-    :param bool cdata:
-        Default is False
-        specifies whether string values should be wrapped in CDATA sections.
-
-    :param xml_namespaces:
-        is a dictionary where key is xmlns prefix and value the urn, Default is {}. Example:
-
-        .. code-block:: python
-
-            { 'flex': 'http://www.w3.org/flex/flexBase', 'xsl': "http://www.w3.org/1999/XSL/Transform"}
-
-        results in
-
-        .. code-block:: xml
-
-            <root xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:flex="http://www.w3.org/flex/flexBase">
-
-    :param bool list_headers:
-        Default is False
-        Repeats the header for every element in a list. Example if True:
-
-        .. code-block:: python
-
-            "Bike": [
-            {'frame_color': 'red'},
-            {'frame_color': 'green'}
-            ]}
-
-        results in
-
-        .. code-block:: xml
-
-            <Bike><frame_color>red</frame_color></Bike>
-            <Bike><frame_color>green</frame_color></Bike>
-
-    :param bool xpath_format:
-        Default is False
-        When True, produces XPath 3.1 json-to-xml compliant output as specified
-        by W3C (https://www.w3.org/TR/xpath-functions-31/#func-json-to-xml).
-        Uses type-based element names (map, array, string, number, boolean, null)
-        with key attributes and the http://www.w3.org/2005/xpath-functions namespace.
-
-        Example:
-
-        .. code-block:: python
-
-            {"name": "John", "age": 30}
-
-        results in
-
-        .. code-block:: xml
-
-            <map xmlns="http://www.w3.org/2005/xpath-functions">
-              <string key="name">John</string>
-              <number key="age">30</number>
-            </map>
-
-    Dictionaries-keys with special char '@' has special meaning:
-    @attrs: This allows custom xml attributes:
-
-    .. code-block:: python
-
-        {'@attr':{'a':'b'}, 'x':'y'}
-
-    results in
-
-    .. code-block:: xml
-
-        <root a="b"><x>y</x></root>
-
-    @flat: If a key ends with @flat (or dict contains key '@flat'),
-    encapsulating node is omitted. Similar to item_wrap.
-    @val: @attrs requires complex dict type. If primitive type should be used, then @val is used as key.
-    To add custom xml-attributes on a list {'list': [4, 5, 6]}, you do this:
-
-    .. code-block:: python
-
-        {'list': {'@attrs': {'a':'b','c':'d'}, '@val': [4, 5, 6]}
-
-    which results in
-
-    .. code-block:: xml
-
-        <list a="b" c="d"><item>4</item><item>5</item><item>6</item></list>
-
-    """
-    if xpath_format:
-        xml_content = convert_to_xpath31(obj)
-        output = [
-            '<?xml version="1.0" encoding="UTF-8" ?>',
-            xml_content.replace("<map", f'<map xmlns="{XPATH_FUNCTIONS_NS}"', 1)
-            if xml_content.startswith("<map")
-            else xml_content.replace("<array", f'<array xmlns="{XPATH_FUNCTIONS_NS}"', 1)
-            if xml_content.startswith("<array")
-            else f'<map xmlns="{XPATH_FUNCTIONS_NS}">{xml_content}</map>',
-        ]
-        return "".join(output).encode("utf-8")
-
-    output = []
-    namespace_str = ""
-    for prefix in xml_namespaces:
-        if prefix == 'xsi':
-            for schema_att in xml_namespaces[prefix]:
-                if schema_att == 'schemaInstance':
-                    ns = xml_namespaces[prefix]['schemaInstance']
-                    namespace_str += f' xmlns:{prefix}="{ns}"'
-                elif schema_att == 'schemaLocation':
-                    ns = xml_namespaces[prefix][schema_att]
-                    namespace_str += f' xsi:{schema_att}="{ns}"'
-
-        elif prefix == 'xmlns':
-            # xmns needs no prefix
-            ns = xml_namespaces[prefix]
-            namespace_str += f' xmlns="{ns}"'
-
+    '''docstring: see top of file'''
+    if  xpath_format:
+        xml_content     = convert_to_xpath31(obj)
+        xmlns           = 'xmlns="' + XPATH_FUNCTIONS_NS + '"'
+        if  xml_content.startswith(           '<array>'):
+            part2       = xml_content.replace('<array>',
+                                              '<array ' + xmlns + '>', 1)
+        elif xml_content.startswith(          '<map>'):
+            part2       = xml_content.replace('<map>',
+                                              '<map '   + xmlns + '>', 1)
         else:
-            ns = xml_namespaces[prefix]
-            namespace_str += f' xmlns:{prefix}="{ns}"'
-    if root:
-        output.append('<?xml version="1.0" encoding="UTF-8" ?>')
-        output_elem = convert(
-            obj, ids, attr_type, item_func, cdata, item_wrap, parent=custom_root, list_headers=list_headers
-        )
-        output.append(f"<{custom_root}{namespace_str}>{output_elem}</{custom_root}>")
-    else:
-        output.append(
-            convert(obj, ids, attr_type, item_func, cdata, item_wrap, parent="", list_headers=list_headers)
-        )
-
+            part2       =                     '<map '   + xmlns + '>'   \
+                                                        + xml_content   \
+                                            + '</map>'
+        output          = prolog + part2
+    else:                       # not xpath_format
+        output          = ''
+        namespace_str   = ''
+        if  xml_namespaces is None:
+            xml_namespaces = {}
+        for     prefix in xml_namespaces:
+            if  prefix == 'xsi':
+                for schema_att in xml_namespaces[prefix]:
+                    if schema_att == 'schemaInstance':
+                        ns = xml_namespaces[prefix]['schemaInstance']
+                        namespace_str += f' xmlns:{prefix}="{ns}"'
+                    elif schema_att == 'schemaLocation':
+                        ns = xml_namespaces[prefix][schema_att]
+                        namespace_str += f' xsi:{schema_att}="{ns}"'
+            elif prefix == 'xmlns':
+                # xmns needs no prefix
+                ns              = xml_namespaces[prefix]
+                namespace_str += f' xmlns="{ns}"'
+            else:
+                ns              = xml_namespaces[prefix]
+                namespace_str += f' xmlns:{prefix}="{ns}"'
+        if  root:
+            output_elem = convert(
+                obj, ids, attr_type, item_func, cdata, item_wrap, parent=custom_root, list_headers=list_headers)
+            output      = prolog                                            \
+                        + '<'   + custom_root + ' ' + namespace_str + '>'   \
+                                + output_elem                               \
+                        + '</'  + custom_root                       + '>'
+        else:                   # not root
+            custom_root = ''
+            output_elem = convert(
+                obj, ids, attr_type, item_func, cdata, item_wrap, parent=custom_root, list_headers=list_headers)
+            output      = output_elem       # no prolog here, since it needs custom root
     return "".join(output).encode("utf-8")
