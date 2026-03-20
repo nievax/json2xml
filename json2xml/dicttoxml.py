@@ -2,95 +2,105 @@
     function dicttoxml (see below) converts a python object into XML.
 
     :param dict obj:
-        dictionary
 
-    :param bool root:
-        Default is True
-        specifies wheter the output is wrapped in an XML root element
+    :param bool use_root:
+        output is wrapped in an XML root element
+        default is True
 
-    :param custom_root:
-        Default is 'root'
-        allows you to specify a custom root element.
+    :param str custom_root:
+        specify a custom root element
+        default is 'root'
 
-    :param bool ids:
-        Default is False
-        specifies whether elements get unique ids.
+    :param bool wrap_array_items:
+        warp each array item into a tag
+        default is True
 
-    :param bool attr_type:
-        Default is True
-        specifies whether elements get a data type attribute.
-
-    :param bool item_wrap:
-        Default is True
-        specifies whether to nest each item in an array in <item/>.
-
-        Example if True:
-
-        ..code-block:: python
+        ..python
 
             data = {'bike': ['blue', 'green']}
 
-        .. code-block:: xml
+        .. xml
+
+            Example if True:
 
             <bike>
-            <item>blue</item>
-            <item>green</item>
+                <item>
+                    blue
+                </item>
+                <item>
+                    green
+                </item>
             </bike>
 
-        Example if False:
+            Example if False:
 
-        ..code-block:: python
+            <bike>
+                    blue
+            </bike>
+            <bike>
+                    green
+            </bike>'
 
-            data = {'bike': ['blue', 'green']}
-
-        ..code-block:: xml
-
-            <bike>blue</bike>
-            <bike>green</bike>'
-
-    :param item_func:
-        items in a list. Default is 'item'
-        specifies what function should generate the element name for
-
-    :param bool cdata:
-        Default is False
-        specifies whether string values should be wrapped in CDATA sections.
-
-    :param xml_namespaces:
-        is a dictionary where key is xmlns prefix and value the urn, Default is {}. Example:
-
-        .. code-block:: python
-
-            { 'flex': 'http://www.w3.org/flex/flexBase', 'xsl': "http://www.w3.org/1999/XSL/Transform"}
-
-        results in
-
-        .. code-block:: xml
-
-            <root xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:flex="http://www.w3.org/flex/flexBase">
+    :param array_items_wrap:
+        how to generate the tag for each array item
+        default is 'item'
 
     :param bool list_headers:
-        Default is False
-        Repeats the header for every element in a list.
+        repeats the header for each array element
+        default is False 
         
-        Example if True:
-
-        .. code-block:: python
+        .. python
 
             "Bike": [
-            {'frame_color': 'red'},
-            {'frame_color': 'green'}
+                {'frame_color': 'red'},
+                {'frame_color': 'green'}
             ]}
 
-        results in
+        .. xml
 
-        .. code-block:: xml
+            Example if True:
 
-            <Bike><frame_color>red</frame_color></Bike>
-            <Bike><frame_color>green</frame_color></Bike>
+            <Bike>
+                <frame_color>
+                    red
+                </frame_color>
+            </Bike>
+            <Bike>
+                <frame_color>
+                    green
+                </frame_color>
+            </Bike>
+
+    :param bool ids:
+        elements get unique ids
+        default is False
+
+    :param bool attr_type:
+        elements get a data type attribute
+        default is True
+
+    :param bool cdata:
+        wrap string values into CDATA
+        default is False
+
+    :param dict xml_namespaces:
+        key is  xmlns prefix and value the URN
+        default is {}
+        Example:
+
+        .. python
+
+            { 'flex': "http://www.w3.org/flex/flexBase",
+              'xsl':  "http://www.w3.org/1999/XSL/Transform",
+            }
+
+        .. xml
+
+            <root xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                  xmlns:flex="http://www.w3.org/flex/flexBase">
 
     :param bool xpath_format:
-        Default is False
+        default is False
         When True, produces XPath 3.1 json-to-xml compliant output as specified
         by W3C (https://www.w3.org/TR/xpath-functions-31/#func-json-to-xml).
         Uses type-based element names (map, array, string, number, boolean, null)
@@ -98,48 +108,70 @@
 
         Example:
 
-        .. code-block:: python
+        .. python
 
-            {"name": "John", "age": 30}
+            {"name": "John",
+             "age":  30,
+            }
 
-        results in
-
-        .. code-block:: xml
+        .. xml
 
             <map xmlns="http://www.w3.org/2005/xpath-functions">
-              <string key="name">John</string>
-              <number key="age">30</number>
+                <string key="name">
+                    John
+                </string>
+                <number key="age">
+                    30
+                </number>
             </map>
 
-    Dictionaries-keys with special char '@' has special meaning:
+
+    # #####################################################################
+    
+    Dictionary-keys with special char '@' have special meanings:
+
     @attrs: This allows custom xml attributes:
 
-    .. code-block:: python
+    .. python
 
-        {'@attr':{'a':'b'}, 'x':'y'}
-
-    results in
+        {'@attr':   {'a':'b'},
+         'x':        'y',
+        }
 
     .. code-block:: xml
 
-        <root a="b"><x>y</x></root>
+        <root a="b">
+            <x>
+                y
+            </x>
+        </root>
 
     @flat: If a key ends with @flat (or dict contains key '@flat'),
-    encapsulating node is omitted. Similar to item_wrap.
+    encapsulating node is omitted. Similar to wrap_array_items.
+
     @val: @attrs requires complex dict type. If primitive type should be used, then @val is used as key.
     To add custom xml-attributes on a list {'list': [4, 5, 6]}, you do this:
 
-    .. code-block:: python
+    .. python
 
-        {'list': {'@attrs': {'a':'b','c':'d'}, '@val': [4, 5, 6]}
+        {'list': {
+                    '@attrs': {'a':'b',
+                                'c':'d',
+                                },
+                    '@val': [4, 5, 6],
+                }
+        }
 
-    which results in
+    .. xml
 
-    .. code-block:: xml
-
-        <list a="b" c="d"><item>4</item><item>5</item><item>6</item></list>
+        <list a="b" c="d">
+            <item>4</item>
+            <item>5</item>
+            <item>6</item>
+        </list>
 
     """
+
 from __future__         import annotations
 import datetime
 import logging
@@ -151,6 +183,11 @@ from random             import SystemRandom
 from typing             import Any, Union, cast
 
 from defusedxml.minidom import parseString
+
+XPATH_FUNCTIONS_NS = "http://www.w3.org/2005/xpath-functions"
+
+# ##############################################
+# TODO refactoring
 
 # Create a safe random number generator
 
@@ -172,7 +209,7 @@ def make_id(element: str, start: int = 100000, end: int = 999999) -> str:
     safe_random = SystemRandom()
     return f"{element}_{safe_random.randint(start, end)}"
 
-def get_unique_id(element: str) -> str:
+def get_unique_id(element: str)                                   -> str:
     """
     Generate a unique ID for a given element.
 
@@ -193,6 +230,8 @@ def get_unique_id(element: str) -> str:
             this_id = make_id(element)
     return ids[-1]
 
+# ##############################################
+
 ELEMENT = Union[
     str,
     int,
@@ -209,7 +248,9 @@ ELEMENT = Union[
     dict[str, Any],
 ]
 
-def get_xml_type(val: ELEMENT) -> str:
+# TODO refactoring
+
+def get_xml_type(val: ELEMENT)                          -> str:
     """
     Get the XML type of a given value.
 
@@ -238,7 +279,7 @@ def get_xml_type(val: ELEMENT) -> str:
         return "null"
     return type(val).__name__
 
-def escape_xml(s: str | int | float | numbers.Number) -> str:
+def escape_xml(s: str | int | float | numbers.Number)   -> str:
     """
     Escape a string for use in XML.
 
@@ -257,7 +298,7 @@ def escape_xml(s: str | int | float | numbers.Number) -> str:
         s = s.replace(">", "&gt;")
     return str(s)
 
-def make_attrstring(attr: dict[str, Any]) -> str:
+def make_attrstring(attr: dict[str, Any])               -> str:
     """
     Create a string of XML attributes from a dictionary.
 
@@ -270,7 +311,7 @@ def make_attrstring(attr: dict[str, Any]) -> str:
     attrstring = " ".join([f'{k}="{escape_xml(v)}"' for k, v in attr.items()])
     return f'{" " if attrstring != "" else ""}{attrstring}'
 
-def key_is_valid_xml(key: str) -> bool:
+def key_is_valid_xml(key: str)                          -> bool:
     """
     Check if a key is a valid XML name.
 
@@ -315,98 +356,201 @@ def make_valid_xml_name(key: str, attr: dict[str, Any]) -> tuple[str, dict[str, 
     key = "key"
     return key, attr
 
+# ##############################################
+
+# TODO refactoring
 def wrap_cdata(s: str | int | float | numbers.Number) -> str:
     """Wraps a string into CDATA sections"""
     s = str(s).replace("]]>", "]]]]><![CDATA[>")
-    return "<![CDATA[" + s + "]]>"
+    return "<![CDATA[" + s +  "]]>"
 
-def default_item_func(parent: str) -> str:
-    '''docstring'''
+# TODO make this configurable ("node")
+# do not delete parent parameter
+def default_item_func(parent: str)                    -> str:
+    '''how to wrap array items; default is "item" '''
     return "item"
 
+# ##############################################
+
 # XPath 3.1 json-to-xml conversion
-# Spec: https://www.w3.org/TR/xpath-functions-31/#json-to-xml-mapping
-XPATH_FUNCTIONS_NS = "http://www.w3.org/2005/xpath-functions"
-
-def get_xpath31_tag_name(val: Any) -> str:
+def get_xpath31_tag_name(val: Any)                                -> str:
     """
-    Determine XPath 3.1 tag name by Python type.
-
+    Determine XPath 3.1 tag name by Python type
     See: https://www.w3.org/TR/xpath-functions-31/#func-json-to-xml
+    Args:
+        val: the value to get the tag name for
+    """
+    return_value = ""
+    if              val is None:
+        return_value = "null"
+    relations   = [ { "python":  bool,              "tag":   "boolean", },
+                    { "python":  dict,              "tag":   "map",     },
+
+                    { "python":  list,              "tag":   "array",   },
+                    { "python":  Sequence,          "tag":   "array",   },
+
+                    { "python":  str,               "tag":   "string",  },
+                    { "python":  bytes,             "tag":   "string",  },
+                    { "python":  bytearray,         "tag":   "string",  },
+                    
+                    { "python":  int,               "tag":   "number",  },
+                    { "python":  float,             "tag":   "number",  },
+                    { "python":  numbers.Number,    "tag":   "number",  },
+                    ]
+    for relation in relations:
+        if  isinstance(val, relation["python"]):
+            return_value =  relation["tag"]
+            break
+    if      return_value == "":
+            return_value = "string"
+    return  return_value
+
+def convert_to_xpath31(  obj: Any, parent_key: str | None = None) -> str:
+    """
+    Convert a Python object to XPath 3.1 json-to-xml format
 
     Args:
-        val: The value to get the tag name for.
+        obj:        the object to convert
+        parent_key: the key from the parent dict (used for key attribute)
 
     Returns:
-        str: The XPath 3.1 tag name (map, array, string, number, boolean, null).
+        str:        XML string in XPath 3.1 format
     """
-    if val is None:
-        return "null"
-    if isinstance(val, bool):
-        return "boolean"
-    if isinstance(val, dict):
-        return "map"
-    if isinstance(val, (int, float, numbers.Number)):
-        return "number"
-    if isinstance(val, str):
-        return "string"
-    if isinstance(val, (bytes, bytearray)):
-        return "string"
-    if isinstance(val, Sequence):
-        return "array"
-    return "string"
+    return_value        = ''
+    if  parent_key is not None:
+        key_attr        = 'key="' + escape_xml(parent_key) + '"'
+    else:
+        key_attr        = ''
+    tag_name            = get_xpath31_tag_name(obj)
+    # if  tag_name        ==    'null':
+    #     return_value    =    '<null'       + ' ' + key_attr + '/>'
+    relations   = [ { "tag":  'null',       "content":                  '',                                         },
+                    { "tag":  'boolean',    "content":              str(obj).lower(),                               },
+                    { "tag":  'number',     "content":                  obj,                                        },
+                    { "tag":  'string',     "content":   escape_xml(str(obj)),                                      },
+                    { "tag":  'map',        "content":   ''.join(convert_to_xpath31(v, k) for k, v in obj.items()), },  # children
+                    { "tag":  "array",      "content":   ''.join(convert_to_xpath31(item) for item in obj),         },  # children
+                    ]
+    for relation in relations:
+        tag             = relation["tag"]
+        content         = relation["content"]
+        if  tag_name    ==        tag:
+            return_value = '<'  + tag      + ' ' + key_attr + '>'   \
+                                + content                           \
+                         + '</' + tag                       + '>'
+            break
+    if  return_value    == '':
+        return_value     = '<'  + 'string' + ' ' + key_attr + '>'   \
+                                +  escape_xml(str(obj))             \
+                         + '</' + 'string'                  + '>'
+    return return_value
 
-def convert_to_xpath31(obj: Any, parent_key: str | None = None) -> str:
+# ##############################################
+# TODO refactoring
+
+def is_primitive_type(val: Any) -> bool:
+    '''docstring'''
+    t = get_xml_type(val)
+    return t in {"str", "int", "float", "bool", "number", "null"}
+
+def dict2xml_str(
+    attr_type: bool,
+    attr: dict[str, Any],
+    item: dict[str, Any],
+    array_items_wrap: Callable[[str], str],
+    cdata: bool,
+    item_name: str,
+    wrap_array_items: bool,
+    parent_is_list: bool,
+    parent: str = "",
+    list_headers: bool = False,
+) -> str:
     """
-    Convert a Python object to XPath 3.1 json-to-xml format.
-
-    See: https://www.w3.org/TR/xpath-functions-31/#json-to-xml-mapping
-
-    Args:
-        obj: The object to convert.
-        parent_key: The key from the parent dict (used for key attribute).
-
-    Returns:
-        str: XML string in XPath 3.1 format.
+    parse dict2xml
     """
-    key_attr = f' key="{escape_xml(parent_key)}"' if parent_key is not None else ""
-    tag_name = get_xpath31_tag_name(obj)
+    ids: list[str] = []  # initialize list of unique ids
+    ", ".join(str(key) for key in item)
+    subtree = ""  # Initialize subtree with default empty string
 
-    if tag_name == "null":
-        return f"<null{key_attr}/>"
+    if attr_type:
+        attr["type"] = get_xml_type(item)
+    val_attr: dict[str, str] = item.pop("@attrs", attr)  # update attr with custom @attr if exists
+    rawitem = item["@val"] if "@val" in item else item
+    if is_primitive_type(rawitem):
+        if isinstance(rawitem, dict):
+            subtree = escape_xml(str(rawitem))
+        if isinstance(rawitem, str):
+            subtree = escape_xml(rawitem)
+    else:
+        # we can not use convert_dict, because rawitem could be non-dict
+        subtree = convert(
+            rawitem, ids, attr_type, array_items_wrap, cdata, wrap_array_items, item_name, list_headers=list_headers
+        )
 
-    if tag_name == "boolean":
-        return f"<boolean{key_attr}>{str(obj).lower()}</boolean>"
+    if parent_is_list and list_headers:
+        if len(val_attr) > 0 and not wrap_array_items:
+            attrstring = make_attrstring(val_attr)
+            return f"<{parent}{attrstring}>{subtree}</{parent}>"
+        return f"<{parent}>{subtree}</{parent}>"
+    elif item.get("@flat", False) or (parent_is_list and not wrap_array_items):
+        return subtree
 
-    if tag_name == "number":
-        return f"<number{key_attr}>{obj}</number>"
+    attrstring = make_attrstring(val_attr)
 
-    if tag_name == "string":
-        return f"<string{key_attr}>{escape_xml(str(obj))}</string>"
+    return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
 
-    if tag_name == "map":
-        children = "".join(convert_to_xpath31(v, k) for k, v in obj.items())
-        return f"<map{key_attr}>{children}</map>"
+def list2xml_str(
+    attr_type: bool,
+    attr: dict[str, Any],
+    item: Sequence[Any],
+    array_items_wrap: Callable[[str], str],
+    cdata: bool,
+    item_name: str,
+    wrap_array_items: bool,
+    list_headers: bool = False,
+) -> str:
+    '''docstring'''
+    ids: list[str] = []  # initialize list of unique ids
+    if attr_type:
+        attr["type"] = get_xml_type(item)
+    flat = False
+    subtree = ""  # Initialize subtree with default empty string
+    if item_name.endswith("@flat"):
+        item_name = item_name[0:-5]
+        flat = True
+    subtree = convert_list(
+        items=item,
+        ids=ids,
+        parent=item_name,
+        attr_type=attr_type,
+        array_items_wrap=array_items_wrap,
+        cdata=cdata,
+        wrap_array_items=wrap_array_items,
+        list_headers=list_headers
+    )
+    if flat or (len(item) > 0 and is_primitive_type(item[0]) and not wrap_array_items):
+        return subtree
+    elif list_headers:
+        return subtree
+    attrstring = make_attrstring(attr)
+    return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
 
-    if tag_name == "array":
-        children = "".join(convert_to_xpath31(item) for item in obj)
-        return f"<array{key_attr}>{children}</array>"
-
-    return f"<string{key_attr}>{escape_xml(str(obj))}</string>"
+# ##############################################
+# TODO refactoring
 
 def convert(
     obj: ELEMENT,
     ids: Any,
     attr_type: bool,
-    item_func: Callable[[str], str],
+    array_items_wrap: Callable[[str], str],
     cdata: bool,
-    item_wrap: bool,
+    wrap_array_items: bool,
     parent: str = "root",
     list_headers: bool = False,
 ) -> str:
     """Routes the elements of an object to the right function to convert them
     based on their data type"""
-    item_name = item_func(parent)
+    item_name = array_items_wrap(parent)
     # since bool is also a subtype of number.Number and int, the check for bool
     # never comes and hence we get wrong value for the xml type bool
     # here, we just change order and check for bool first, because no other
@@ -439,108 +583,21 @@ def convert(
         return convert_none(key=item_name, attr_type=attr_type, cdata=cdata)
 
     if isinstance(obj, dict):
-        return convert_dict(cast("dict[str, Any]", obj), ids, parent, attr_type, item_func, cdata, item_wrap, list_headers=list_headers)
+        return convert_dict(cast("dict[str, Any]", obj), ids, parent, attr_type, array_items_wrap, cdata, wrap_array_items, list_headers=list_headers)
 
     if isinstance(obj, Sequence):
-        return convert_list(obj, ids, parent, attr_type, item_func, cdata, item_wrap, list_headers=list_headers)
+        return convert_list(obj, ids, parent, attr_type, array_items_wrap, cdata, wrap_array_items, list_headers=list_headers)
 
     raise TypeError(f"Unsupported data type: {obj} ({type(obj).__name__})")
-
-def is_primitive_type(val: Any) -> bool:
-    '''docstring'''
-    t = get_xml_type(val)
-    return t in {"str", "int", "float", "bool", "number", "null"}
-
-def dict2xml_str(
-    attr_type: bool,
-    attr: dict[str, Any],
-    item: dict[str, Any],
-    item_func: Callable[[str], str],
-    cdata: bool,
-    item_name: str,
-    item_wrap: bool,
-    parent_is_list: bool,
-    parent: str = "",
-    list_headers: bool = False,
-) -> str:
-    """
-    parse dict2xml
-    """
-    ids: list[str] = []  # initialize list of unique ids
-    ", ".join(str(key) for key in item)
-    subtree = ""  # Initialize subtree with default empty string
-
-    if attr_type:
-        attr["type"] = get_xml_type(item)
-    val_attr: dict[str, str] = item.pop("@attrs", attr)  # update attr with custom @attr if exists
-    rawitem = item["@val"] if "@val" in item else item
-    if is_primitive_type(rawitem):
-        if isinstance(rawitem, dict):
-            subtree = escape_xml(str(rawitem))
-        if isinstance(rawitem, str):
-            subtree = escape_xml(rawitem)
-    else:
-        # we can not use convert_dict, because rawitem could be non-dict
-        subtree = convert(
-            rawitem, ids, attr_type, item_func, cdata, item_wrap, item_name, list_headers=list_headers
-        )
-
-    if parent_is_list and list_headers:
-        if len(val_attr) > 0 and not item_wrap:
-            attrstring = make_attrstring(val_attr)
-            return f"<{parent}{attrstring}>{subtree}</{parent}>"
-        return f"<{parent}>{subtree}</{parent}>"
-    elif item.get("@flat", False) or (parent_is_list and not item_wrap):
-        return subtree
-
-    attrstring = make_attrstring(val_attr)
-
-    return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
-
-def list2xml_str(
-    attr_type: bool,
-    attr: dict[str, Any],
-    item: Sequence[Any],
-    item_func: Callable[[str], str],
-    cdata: bool,
-    item_name: str,
-    item_wrap: bool,
-    list_headers: bool = False,
-) -> str:
-    '''docstring'''
-    ids: list[str] = []  # initialize list of unique ids
-    if attr_type:
-        attr["type"] = get_xml_type(item)
-    flat = False
-    subtree = ""  # Initialize subtree with default empty string
-    if item_name.endswith("@flat"):
-        item_name = item_name[0:-5]
-        flat = True
-    subtree = convert_list(
-        items=item,
-        ids=ids,
-        parent=item_name,
-        attr_type=attr_type,
-        item_func=item_func,
-        cdata=cdata,
-        item_wrap=item_wrap,
-        list_headers=list_headers
-    )
-    if flat or (len(item) > 0 and is_primitive_type(item[0]) and not item_wrap):
-        return subtree
-    elif list_headers:
-        return subtree
-    attrstring = make_attrstring(attr)
-    return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
 
 def convert_dict(
     obj: dict[str, Any],
     ids: list[str],
     parent: str,
     attr_type: bool,
-    item_func: Callable[[str], str],
+    array_items_wrap: Callable[[str], str],
     cdata: bool,
-    item_wrap: bool,
+    wrap_array_items: bool,
     list_headers: bool = False
 ) -> str:
     """Converts a dict into an XML string."""
@@ -580,7 +637,7 @@ def convert_dict(
         elif isinstance(val, dict):
             addline(
                 dict2xml_str(
-                    attr_type, attr, val, item_func, cdata, key, item_wrap,
+                    attr_type, attr, val, array_items_wrap, cdata, key, wrap_array_items,
                     False,
                     list_headers=list_headers
                 )
@@ -592,10 +649,10 @@ def convert_dict(
                     attr_type=attr_type,
                     attr=attr,
                     item=val,
-                    item_func=item_func,
+                    array_items_wrap=array_items_wrap,
                     cdata=cdata,
                     item_name=key,
-                    item_wrap=item_wrap,
+                    wrap_array_items=wrap_array_items,
                     list_headers=list_headers
                 )
             )
@@ -613,16 +670,16 @@ def convert_list(
     ids: list[str] | None,
     parent: str,
     attr_type: bool,
-    item_func: Callable[[str], str],
+    array_items_wrap: Callable[[str], str],
     cdata: bool,
-    item_wrap: bool,
+    wrap_array_items: bool,
     list_headers: bool = False,
 ) -> str:
     """Converts a list into an XML string."""
     output: list[str] = []
     addline = output.append
 
-    item_name = item_func(parent)  # Is item_name still relevant if item_wrap is false
+    item_name = array_items_wrap(parent)  # Is item_name still relevant if wrap_array_items is false
     if item_name.endswith("@flat"):
         item_name = item_name[:-5]
     this_id = None
@@ -636,7 +693,7 @@ def convert_list(
             addline(convert_bool(item_name, item, attr_type, attr, cdata))
 
         elif isinstance(item, (numbers.Number, str)):
-            if item_wrap:
+            if wrap_array_items:
                 addline(
                     convert_kv(
                         key=item_name,
@@ -674,10 +731,10 @@ def convert_list(
                     attr_type=attr_type,
                     attr=attr,
                     item=item,
-                    item_func=item_func,
+                    array_items_wrap=array_items_wrap,
                     cdata=cdata,
                     item_name=item_name,
-                    item_wrap=item_wrap,
+                    wrap_array_items=wrap_array_items,
                     parent_is_list=True,
                     parent=parent,
                     list_headers=list_headers
@@ -690,10 +747,10 @@ def convert_list(
                     attr_type=attr_type,
                     attr=attr,
                     item=item,
-                    item_func=item_func,
+                    array_items_wrap=array_items_wrap,
                     cdata=cdata,
                     item_name=item_name,
-                    item_wrap=item_wrap,
+                    wrap_array_items=wrap_array_items,
                     list_headers=list_headers
                 )
             )
@@ -752,18 +809,23 @@ def convert_none(
     attr_string = make_attrstring(attr)
     return f"<{key}{attr_string}></{key}>"
 
+# ##############################################
+
 def dicttoxml(
     obj:            ELEMENT,
-    xpath_format:   bool                    = False,
-    root:           bool                    = True,
-    custom_root:    str                     = "root",
-    ids:            list[int] | None        = None,
-    attr_type:      bool                    = True,
-    item_wrap:      bool                    = True,
-    item_func:      Callable[[str], str]    = default_item_func,
-    cdata:          bool                    = False,
-    xml_namespaces: dict[str, Any] | None   = None,
-    list_headers:   bool                    = False,
+    xpath_format:   bool                    = False,                # default is False
+
+    use_root:       bool                    = True,                 # default is True;  wrap the output into an XML root element
+    custom_root:    str                     = "root",               # default is "root"
+
+    wrap_array_items:   bool                = True,                 # default is True;  wrap each array item into a tag
+    array_items_wrap:   Callable[[str], str]= default_item_func,    # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
+
+    list_headers:   bool                    = False,                # default is False; wrap each array item into the outer header (see also wrap_array_items); TODO better name
+    attr_type:      bool                    = True,                 # default is True;  display data type
+    cdata:          bool                    = False,                # default is False; wrap string values into CDATA sections
+    ids:            list[int]      | None   = None,                 # default is None / [];  elements get unique ids
+    xml_namespaces: dict[str, Any] | None   = None,                 # default is None / {}
     prolog:         str                     = '<?xml version="1.0" encoding="UTF-8" ?>'
 ) -> bytes:
     '''docstring: see top of file'''
@@ -802,16 +864,16 @@ def dicttoxml(
             else:
                 ns              = xml_namespaces[prefix]
                 namespace_str += f' xmlns:{prefix}="{ns}"'
-        if  root:
+        if  use_root:
             output_elem = convert(
-                obj, ids, attr_type, item_func, cdata, item_wrap, parent=custom_root, list_headers=list_headers)
+                obj, ids, attr_type, array_items_wrap, cdata, wrap_array_items, parent=custom_root, list_headers=list_headers)
             output      = prolog                                            \
                         + '<'   + custom_root + ' ' + namespace_str + '>'   \
                                 + output_elem                               \
                         + '</'  + custom_root                       + '>'
-        else:                   # not root
+        else:                   # not use_root
             custom_root = ''
             output_elem = convert(
-                obj, ids, attr_type, item_func, cdata, item_wrap, parent=custom_root, list_headers=list_headers)
+                obj, ids, attr_type, array_items_wrap, cdata, wrap_array_items, parent=custom_root, list_headers=list_headers)
             output      = output_elem       # no prolog here, since it needs custom root
     return "".join(output).encode("utf-8")
