@@ -1,5 +1,6 @@
 {
     "login":      "mojombo",
     "id":          2,
-    "avatar_url": "https://example.com/avatar.png"
+    "avatar_url": "https://example.com/avatar.png",
+    "bike":         ["blue", "green"]
 }

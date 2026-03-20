@@ -23,9 +23,10 @@ class Json2xml:
         xml_namespaces: dict | None = None,     # default is None / {}
         list_headers:   bool        = False,    # default is False; repeat the outer header for each array element;   TODO use for DS?
 
-        wrap_array_items: bool      = False,    # default is True;  wrap each array item into a tag;                  TODO use for DS?
+        wrap_array_items: bool      = True,     # default is True;  wrap each array item into a tag;                  TODO use for DS?
         # array_items_wrap: fct       = ??,     # default is default_item_func / "item";                              TODO make this work
-
+        custom_array_item_wrap: str = "node",
+        
         pretty:         bool        = True,     # new lines + indenting; False gives no string, but bytes
     ):
         self.data                   = data
@@ -35,6 +36,7 @@ class Json2xml:
         self.attr_type              = attr_type
         self.wrap_array_items       = wrap_array_items
         # self.array_items_wrap       = array_items_wrap,
+        self.custom_array_item_wrap = custom_array_item_wrap
         self.cdata                  = cdata
         self.ids                    = ids
         self.xml_namespaces         = xml_namespaces
@@ -46,16 +48,17 @@ class Json2xml:
         if self.data:
             xml_data = dicttoxml.dicttoxml(
                 self.data,
-                xpath_format        = self.xpath_format,
-                use_root            = self.use_root,
-                custom_root         = self.root,
-                wrap_array_items    = self.wrap_array_items,
-                # array_items_wrap    = self.array_items_wrap,
-                list_headers        = self.list_headers,
-                attr_type           = self.attr_type,
-                cdata               = self.cdata,
-                ids                 = self.ids,
-                xml_namespaces      = self.xml_namespaces,
+                xpath_format            = self.xpath_format,
+                use_root                = self.use_root,
+                custom_root             = self.root,
+                wrap_array_items        = self.wrap_array_items,
+                # array_items_wrap      = self.array_items_wrap,
+                custom_array_item_wrap  = self.custom_array_item_wrap,
+                list_headers            = self.list_headers,
+                attr_type               = self.attr_type,
+                cdata                   = self.cdata,
+                ids                     = self.ids,
+                xml_namespaces          = self.xml_namespaces,
             )
             if self.pretty:
                 try:

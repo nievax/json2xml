@@ -41,8 +41,12 @@
                     green
             </bike>'
 
-    :param array_items_wrap:
-        how to generate the tag for each array item
+    # :param Callable array_items_wrap:
+    #     how to generate the tag for each array item
+    #     default is default_item_func resp. 'item'
+
+    :param str custom_array_item_wrap:
+        the tag for each array item
         default is 'item'
 
     :param bool list_headers:
@@ -364,11 +368,11 @@ def wrap_cdata(s: str | int | float | numbers.Number) -> str:
     s = str(s).replace("]]>", "]]]]><![CDATA[>")
     return "<![CDATA[" + s +  "]]>"
 
-# TODO make this configurable ("node")
+# TODO
 # do not delete parent parameter
-def default_item_func(parent: str)                    -> str:
-    '''how to wrap array items; default is "item" '''
-    return "item"
+# def default_item_func(parent: str, text: str = "item")            -> str:
+#     '''how to wrap array items'''
+#     return text
 
 # ##############################################
 
@@ -392,7 +396,7 @@ def get_xpath31_tag_name(val: Any)                                -> str:
                     { "python":  str,               "tag":   "string",  },
                     { "python":  bytes,             "tag":   "string",  },
                     { "python":  bytearray,         "tag":   "string",  },
-                    
+
                     { "python":  int,               "tag":   "number",  },
                     { "python":  float,             "tag":   "number",  },
                     { "python":  numbers.Number,    "tag":   "number",  },
@@ -457,7 +461,8 @@ def dict2xml_str(
     attr_type: bool,
     attr: dict[str, Any],
     item: dict[str, Any],
-    array_items_wrap: Callable[[str], str],
+    # array_items_wrap: Callable[[str], str],
+    custom_array_item_wrap: str,
     cdata: bool,
     item_name: str,
     wrap_array_items: bool,
@@ -484,7 +489,7 @@ def dict2xml_str(
     else:
         # we can not use convert_dict, because rawitem could be non-dict
         subtree = convert(
-            rawitem, ids, attr_type, array_items_wrap, cdata, wrap_array_items, item_name, list_headers=list_headers
+            rawitem, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, item_name, list_headers=list_headers
         )
 
     if parent_is_list and list_headers:
@@ -503,7 +508,8 @@ def list2xml_str(
     attr_type: bool,
     attr: dict[str, Any],
     item: Sequence[Any],
-    array_items_wrap: Callable[[str], str],
+    # array_items_wrap: Callable[[str], str],
+    custom_array_item_wrap: str,
     cdata: bool,
     item_name: str,
     wrap_array_items: bool,
@@ -523,7 +529,8 @@ def list2xml_str(
         ids=ids,
         parent=item_name,
         attr_type=attr_type,
-        array_items_wrap=array_items_wrap,
+        # array_items_wrap=array_items_wrap,
+        custom_array_item_wrap = custom_array_item_wrap,
         cdata=cdata,
         wrap_array_items=wrap_array_items,
         list_headers=list_headers
@@ -539,54 +546,45 @@ def list2xml_str(
 # TODO refactoring
 
 def convert(
-    obj: ELEMENT,
-    ids: Any,
-    attr_type: bool,
-    array_items_wrap: Callable[[str], str],
-    cdata: bool,
-    wrap_array_items: bool,
-    parent: str = "root",
-    list_headers: bool = False,
+    obj:                    ELEMENT,
+    ids:                    Any,
+    attr_type:              bool,
+    # array_items_wrap:       Callable[[str], str],
+    cdata:                  bool,
+    wrap_array_items:       bool,
+    custom_array_item_wrap: str,                # TODO new
+    parent:                 str     =   "root",
+    list_headers:           bool    =    False,
 ) -> str:
-    """Routes the elements of an object to the right function to convert them
-    based on their data type"""
-    item_name = array_items_wrap(parent)
-    # since bool is also a subtype of number.Number and int, the check for bool
-    # never comes and hence we get wrong value for the xml type bool
-    # here, we just change order and check for bool first, because no other
-    # type other than bool can be true for bool check
+    """Routes the elements of an object to the right function
+    to convert them based on their data type"""
+    # item_name = array_items_wrap(parent)
+    item_name = custom_array_item_wrap
+    # since bool is also a subtype of number.Number and int,
+    # the check for bool never comes
+    # and hence we get wrong value for the xml type bool here;
+    # we just change order and check for bool first,
+    # because no other type than bool can be true for bool check
     if isinstance(obj, bool):
-        return convert_bool(key=item_name, val=obj, attr_type=attr_type, cdata=cdata)
+        return convert_bool(key=item_name, val=obj,             attr_type=attr_type,          cdata=cdata, )
 
     if isinstance(obj, numbers.Number):
-        return convert_kv(
-            key=item_name, val=obj, attr_type=attr_type, attr={}, cdata=cdata
-        )
+        return convert_kv(  key=item_name, val=obj,             attr_type=attr_type, attr={}, cdata=cdata, )
 
     if isinstance(obj, str):
-        return convert_kv(
-            key=item_name, val=obj, attr_type=attr_type, attr={}, cdata=cdata
-        )
+        return convert_kv(  key=item_name, val=obj,             attr_type=attr_type, attr={}, cdata=cdata, )
 
-    if hasattr(obj, "isoformat") and isinstance(
-        obj, (datetime.datetime, datetime.date)
-    ):
-        return convert_kv(
-            key=item_name,
-            val=obj.isoformat(),
-            attr_type=attr_type,
-            attr={},
-            cdata=cdata,
-        )
+    if isinstance(obj, (datetime.datetime, datetime.date))  and hasattr(obj, "isoformat") :
+        return convert_kv(  key=item_name, val=obj.isoformat(), attr_type=attr_type, attr={}, cdata=cdata, )
 
     if obj is None:
-        return convert_none(key=item_name, attr_type=attr_type, cdata=cdata)
+        return convert_none(key=item_name,                      attr_type=attr_type,          cdata=cdata)
 
     if isinstance(obj, dict):
-        return convert_dict(cast("dict[str, Any]", obj), ids, parent, attr_type, array_items_wrap, cdata, wrap_array_items, list_headers=list_headers)
+        return convert_dict(cast("dict[str, Any]", obj), ids, parent, attr_type, custom_array_item_wrap, cdata, wrap_array_items, list_headers=list_headers)
 
     if isinstance(obj, Sequence):
-        return convert_list(obj, ids, parent, attr_type, array_items_wrap, cdata, wrap_array_items, list_headers=list_headers)
+        return convert_list(                        obj, ids, parent, attr_type, custom_array_item_wrap, cdata, wrap_array_items, list_headers=list_headers)
 
     raise TypeError(f"Unsupported data type: {obj} ({type(obj).__name__})")
 
@@ -595,7 +593,8 @@ def convert_dict(
     ids: list[str],
     parent: str,
     attr_type: bool,
-    array_items_wrap: Callable[[str], str],
+    # array_items_wrap: Callable[[str], str],
+    custom_array_item_wrap: str,
     cdata: bool,
     wrap_array_items: bool,
     list_headers: bool = False
@@ -637,7 +636,7 @@ def convert_dict(
         elif isinstance(val, dict):
             addline(
                 dict2xml_str(
-                    attr_type, attr, val, array_items_wrap, cdata, key, wrap_array_items,
+                    attr_type, attr, val, custom_array_item_wrap, cdata, key, wrap_array_items,
                     False,
                     list_headers=list_headers
                 )
@@ -649,7 +648,7 @@ def convert_dict(
                     attr_type=attr_type,
                     attr=attr,
                     item=val,
-                    array_items_wrap=array_items_wrap,
+                    custom_array_item_wrap=custom_array_item_wrap,
                     cdata=cdata,
                     item_name=key,
                     wrap_array_items=wrap_array_items,
@@ -670,7 +669,8 @@ def convert_list(
     ids: list[str] | None,
     parent: str,
     attr_type: bool,
-    array_items_wrap: Callable[[str], str],
+    # array_items_wrap: Callable[[str], str],
+    custom_array_item_wrap: str,
     cdata: bool,
     wrap_array_items: bool,
     list_headers: bool = False,
@@ -678,8 +678,8 @@ def convert_list(
     """Converts a list into an XML string."""
     output: list[str] = []
     addline = output.append
-
-    item_name = array_items_wrap(parent)  # Is item_name still relevant if wrap_array_items is false
+    # item_name = array_items_wrap(parent)
+    item_name = custom_array_item_wrap  # Is item_name still relevant if wrap_array_items is false
     if item_name.endswith("@flat"):
         item_name = item_name[:-5]
     this_id = None
@@ -731,7 +731,8 @@ def convert_list(
                     attr_type=attr_type,
                     attr=attr,
                     item=item,
-                    array_items_wrap=array_items_wrap,
+                    # array_items_wrap=array_items_wrap,
+                    custom_array_item_wrap=custom_array_item_wrap,
                     cdata=cdata,
                     item_name=item_name,
                     wrap_array_items=wrap_array_items,
@@ -747,7 +748,8 @@ def convert_list(
                     attr_type=attr_type,
                     attr=attr,
                     item=item,
-                    array_items_wrap=array_items_wrap,
+                    # array_items_wrap=array_items_wrap,
+                    custom_array_item_wrap=custom_array_item_wrap,
                     cdata=cdata,
                     item_name=item_name,
                     wrap_array_items=wrap_array_items,
@@ -819,7 +821,8 @@ def dicttoxml(
     custom_root:    str                     = "root",               # default is "root"
 
     wrap_array_items:   bool                = True,                 # default is True;  wrap each array item into a tag
-    array_items_wrap:   Callable[[str], str]= default_item_func,    # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
+    # array_items_wrap:   Callable[[str], str]= default_item_func,    # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
+    custom_array_item_wrap: str             = 'node',
 
     list_headers:   bool                    = False,                # default is False; wrap each array item into the outer header (see also wrap_array_items); TODO better name
     attr_type:      bool                    = True,                 # default is True;  display data type
@@ -866,7 +869,7 @@ def dicttoxml(
                 namespace_str += f' xmlns:{prefix}="{ns}"'
         if  use_root:
             output_elem = convert(
-                obj, ids, attr_type, array_items_wrap, cdata, wrap_array_items, parent=custom_root, list_headers=list_headers)
+                obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, list_headers=list_headers)
             output      = prolog                                            \
                         + '<'   + custom_root + ' ' + namespace_str + '>'   \
                                 + output_elem                               \
@@ -874,6 +877,6 @@ def dicttoxml(
         else:                   # not use_root
             custom_root = ''
             output_elem = convert(
-                obj, ids, attr_type, array_items_wrap, cdata, wrap_array_items, parent=custom_root, list_headers=list_headers)
+                obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, list_headers=list_headers)
             output      = output_elem       # no prolog here, since it needs custom root
     return "".join(output).encode("utf-8")
