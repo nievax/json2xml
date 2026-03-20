@@ -26,7 +26,7 @@ class Json2xml:
         wrap_array_items: bool      = False,    # default is True;  wrap each array item into a tag;                  TODO use for DS?
         # array_items_wrap: fct       = ??,     # default is default_item_func / "item";                              TODO make this work
 
-        pretty:         bool        = True,     # new lines + indenting;                                              TODO when not?
+        pretty:         bool        = True,     # new lines + indenting; False gives no string, but bytes
     ):
         self.data                   = data
         self.xpath_format           = xpath_format

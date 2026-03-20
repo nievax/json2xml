@@ -343,14 +343,16 @@ def main(argv: list[str] | None = None) -> int:
     try:
         converter = Json2xml(
             data=data,
-            wrapper=args.wrapper,
-            root=args.root,
-            pretty=args.pretty,
-            attr_type=args.attr_type,
-            item_wrap=args.item_wrap,
             xpath_format=args.xpath_format,
+            use_root=args.use_root,
+            root=args.root,
+            attr_type=args.attr_type,
             cdata=args.cdata,
+            ids=args.ids,
+            xml_namespaces=args.xmla_namespaces,
             list_headers=args.list_headers,
+            wrap_array_items=args.wrap_array_items,
+            pretty=args.pretty,
         )
         xml_output = converter.to_xml()
 
