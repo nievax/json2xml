@@ -113,11 +113,12 @@ def dicttoxml(
             use_root=use_root,
             custom_root=custom_root,
             wrap_array_items=wrap_array_items,
-            array_items_wrap=array_items_wrap or _py_dicttoxml.default_item_func,
+            # array_items_wrap=array_items_wrap or _py_dicttoxml.default_item_func,
+            # custom_array_item_wrap=custom_array_item_wrap,        # TODO
             list_headers=list_headers,
             attr_type=attr_type,
             cdata=cdata,
-            ids=ids,
+            ids=ids,                                                # TODO or [] ?
             xml_namespaces=xml_namespaces or {},
         )
 

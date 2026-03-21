@@ -1,9 +1,9 @@
 '''docstring'''
-from pyexpat            import ExpatError
+from pyexpat            import ExpatError               # for fct to_xml
 from typing             import Any
-from defusedxml.minidom import parseString
-from json2xml           import dicttoxml
-from .utils             import InvalidDataError
+from defusedxml.minidom import parseString              # for fct to_xml
+from json2xml           import dicttoxml                # for fct to_xml
+from .utils             import InvalidDataError         # for fct to_xml
 
 class Json2xml:
     """Wrapper class to convert the data to xml"""
@@ -44,7 +44,7 @@ class Json2xml:
         self.pretty                 = pretty
 
     def to_xml(self) -> Any | None:
-        """Convert to xml using"""
+        """Convert to xml"""
         if self.data:
             xml_data = dicttoxml.dicttoxml(
                 self.data,

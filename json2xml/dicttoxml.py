@@ -387,23 +387,24 @@ def get_xpath31_tag_name(val: Any)                                -> str:
     return_value = ""
     if              val is None:
         return_value = "null"
-    relations   = [ { "python":  bool,              "tag":   "boolean", },
-                    { "python":  dict,              "tag":   "map",     },
+    #                   python types        tags
+    python_to_tag = [   [bool,           "boolean", ],
+                        [dict,           "map",     ],
 
-                    { "python":  list,              "tag":   "array",   },
-                    { "python":  Sequence,          "tag":   "array",   },
+                        [list,           "array",   ],
+                        [Sequence,       "array",   ],
 
-                    { "python":  str,               "tag":   "string",  },
-                    { "python":  bytes,             "tag":   "string",  },
-                    { "python":  bytearray,         "tag":   "string",  },
+                        [str,            "string",  ],
+                        [bytes,          "string",  ],
+                        [bytearray,      "string",  ],
 
-                    { "python":  int,               "tag":   "number",  },
-                    { "python":  float,             "tag":   "number",  },
-                    { "python":  numbers.Number,    "tag":   "number",  },
+                        [int,            "number",  ],
+                        [float,          "number",  ],
+                        [numbers.Number, "number",  ],
                     ]
-    for relation in relations:
-        if  isinstance(val, relation["python"]):
-            return_value =  relation["tag"]
+    for [python, tag] in python_to_tag:
+        if  isinstance(val, python):
+            return_value =  tag
             break
     if      return_value == "":
             return_value = "string"
@@ -428,16 +429,16 @@ def convert_to_xpath31(  obj: Any, parent_key: str | None = None) -> str:
     tag_name            = get_xpath31_tag_name(obj)
     # if  tag_name        ==    'null':
     #     return_value    =    '<null'       + ' ' + key_attr + '/>'
-    relations   = [ { "tag":  'null',       "content":                  '',                                         },
-                    { "tag":  'boolean',    "content":              str(obj).lower(),                               },
-                    { "tag":  'number',     "content":                  obj,                                        },
-                    { "tag":  'string',     "content":   escape_xml(str(obj)),                                      },
-                    { "tag":  'map',        "content":   ''.join(convert_to_xpath31(v, k) for k, v in obj.items()), },  # children
-                    { "tag":  "array",      "content":   ''.join(convert_to_xpath31(item) for item in obj),         },  # children
-                    ]
-    for relation in relations:
-        tag             = relation["tag"]
-        content         = relation["content"]
+
+    #                 tags                    contents
+    tag_to_conent = [   [ 'null',                   '',                                         ],
+                        [ 'boolean',            str(obj).lower(),                               ],
+                        [ 'number',                 obj,                                        ],
+                        [ 'string',  escape_xml(str(obj)),                                      ],
+                        [ 'map',     ''.join(convert_to_xpath31(v, k) for k, v in obj.items()), ],  # children
+                        [ "array",   ''.join(convert_to_xpath31(item) for item in obj),         ],  # children
+                ]
+    for [tag, content] in tag_to_conent:
         if  tag_name    ==        tag:
             return_value = '<'  + tag      + ' ' + key_attr + '>'   \
                                 + content                           \
