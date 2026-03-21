@@ -188,51 +188,47 @@ from typing             import Any, Union, cast
 
 from defusedxml.minidom import parseString
 
-XPATH_FUNCTIONS_NS = "http://www.w3.org/2005/xpath-functions"
+PROLOG              = '<?xml version="1.0" encoding="UTF-8" ?>'
+XPATH_FUNCTIONS_NS  = 'http://www.w3.org/2005/xpath-functions'
 
 # ##############################################
-# TODO refactoring
 
 # Create a safe random number generator
 
 # Set up logging
 LOG = logging.getLogger("dicttoxml")
 
-def make_id(element: str, start: int = 100000, end: int = 999999) -> str:
+def make_id(      element: str, start: int = 100000, end: int = 999999) -> str:
     """
-    Generate a random ID for a given element.
+    Generate a random ID for a given element
 
     Args:
-        element (str): The element to generate an ID for.
-        start (int, optional): The lower bound for the random number. Defaults to 100000.
-        end (int, optional): The upper bound for the random number. Defaults to 999999.
+        element (str): the element to generate an ID for
+        start (int, optional): The lower bound for the random number. Defaults to 100000
+        end   (int, optional): The upper bound for the random number. Defaults to 999999
 
     Returns:
-        str: The generated ID.
+        str: the generated ID
     """
-    safe_random = SystemRandom()
-    return f"{element}_{safe_random.randint(start, end)}"
 
-def get_unique_id(element: str)                                   -> str:
+    return '' + element + '_' + str(SystemRandom().randint(start, end))
+
+def get_unique_id(element: str)                                         -> str:
     """
-    Generate a unique ID for a given element.
+    Generate a unique ID for a given element
 
     Args:
-        element (str): The element to generate an ID for.
+        element (str): the element to generate an ID for
 
     Returns:
-        str: The unique ID.
+        str: the unique ID
     """
-    ids: list[str] = []  # initialize list of unique ids
-    this_id = make_id(element)
-    dup = True
-    while dup:
-        if this_id not in ids:
-            dup = False
+    ids: list[str]  = []
+    while True:
+        this_id:  str   = make_id(element)
+        if  this_id not in ids:
             ids.append(this_id)
-        else:  # pragma: no cover
-            this_id = make_id(element)
-    return ids[-1]
+            return ids[-1]                  # last in the list
 
 # ##############################################
 
@@ -252,11 +248,9 @@ ELEMENT = Union[
     dict[str, Any],
 ]
 
-# TODO refactoring
-
 def get_xml_type(val: ELEMENT)                          -> str:
     """
-    Get the XML type of a given value.
+    Get the XML type of a given value
 
     Args:
         val (ELEMENT): the value to get the type of
@@ -264,37 +258,40 @@ def get_xml_type(val: ELEMENT)                          -> str:
     Returns:
         str: the XML type
     """
-    if val is not None:
-        if type(val).__name__ in ("str", "unicode"):
-            return "str"
-        if type(val).__name__ in ("int", "long"):
-            return "int"
-        if type(val).__name__ == "float":
-            return "float"
-        if type(val).__name__ == "bool":
-            return "bool"
-        if isinstance(val, numbers.Number):
-            return "number"
-        if isinstance(val, dict):
-            return "dict"
-        if isinstance(val, Sequence):
-            return "list"
-    else:   # if val is None:
-        return "null"
-    return type(val).__name__
+
+    if val is None:
+            return_name =           "null"
+    else:                          # val is not None:
+        if  isinstance(val,          numbers.Number):
+            return_name =           "number"
+        if  isinstance(val,          dict):
+            return_name =           "dict"
+        if  isinstance(val,          Sequence):
+            return_name =           "list"
+        if  type(val).__name__ in  ("str", "unicode"):
+            return_name =           "str"
+        if  type(val).__name__ in  ("int", "long"):
+            return_name =           "int"
+        if  type(val).__name__ ==   "float":
+            return_name =           "float"
+        if  type(val).__name__ ==   "bool":
+            return_name =           "bool"
+        else:
+            return_name =            type(val).__name__
+    return  return_name
 
 def escape_xml(s: str | int | float | numbers.Number)   -> str:
     """
-    Escape a string for use in XML.
+    Escape a string for use in XML
 
     Args:
-        s (str | numbers.Number): The string to escape.
+        s (str | numbers.Number): the string to escape
 
     Returns:
-        str: The escaped string.
+        str:                      the escaped string.
     """
     if isinstance(s, str):
-        s = str(s)  # avoid UnicodeDecodeError
+        s = str(s)                      # avoid UnicodeDecodeError
         s = s.replace("&", "&amp;")
         s = s.replace('"', "&quot;")
         s = s.replace("'", "&apos;")
@@ -328,12 +325,16 @@ def key_is_valid_xml(key: str)                          -> bool:
     Check if a key is a valid XML name.
 
     Args:
-        key (str): The key to check.
+        key (str): the key to check
 
     Returns:
-        bool: True if the key is a valid XML name, False otherwise.
+        bool: True if the key is a valid XML name, False otherwise
     """
-    test_xml = f'<?xml version="1.0" encoding="UTF-8" ?><{key}>foo</{key}>'
+
+    test_xml =  PROLOG              \
+                +  '<' + key + '>'  \
+                +    'foo'          \
+                + '</' + key + '>'
     try:
         parseString(test_xml)
         return True
@@ -342,30 +343,29 @@ def key_is_valid_xml(key: str)                          -> bool:
 
 def make_valid_xml_name(key: str, attr: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     """Tests an XML name and fixes it if invalid"""
+
+    # preparations:
     key = escape_xml(key)
-    # nothing happens at escape_xml if attr is not a string, we don't
-    # need to pass it to the method at all.
+    # nothing happens at escape_xml if attr is not a string,
+    # we don't need to pass it to the method at all:
     # attr = escape_xml(attr)
 
-    # pass through if key is already valid
-    if key_is_valid_xml(key):
+    if  key_is_valid_xml(key):
         return key, attr
 
-    # prepend a lowercase n if the key is numeric
-    if isinstance(key, int) or key.isdigit():
-        return f"n{key}", attr
+    if  isinstance(  key, int) or key.isdigit():
+        return 'n' + key, attr          # prepend a lowercase n(?)
 
-    # replace spaces with underscores if that fixes the problem
-    if key_is_valid_xml(key.replace(" ", "_")):
-        return key.replace(" ", "_"), attr
+    if  key_is_valid_xml(key.replace(" ", "_")):
+        return           key.replace(" ", "_"), attr
 
-    # allow namespace prefixes + ignore @flat in key
-    if key_is_valid_xml(key.replace(":", "").replace("@flat", "")):
+    # allow namespace prefixes + ignore @flat in key:
+    if  key_is_valid_xml(key.replace(":", "").replace("@flat", "")):
         return key, attr
 
-    # key is still invalid - move it into a name attribute
-    attr["name"] = key
-    key = "key"
+    # key is still invalid - move it into a name attribute:
+    attr["name"] =  key
+    key          = "key"
     return key, attr
 
 # ##############################################
@@ -772,54 +772,64 @@ def convert_list(
             raise TypeError(f"Unsupported data type: {item} ({type(item).__name__})")
     return "".join(output)
 
+# TODO make a general fct out of these ("convert a value into an XML element"):
+# TODO rename to convert_number
 def convert_kv(
-    key: str,
-    val: str | int | float | numbers.Number | datetime.datetime | datetime.date,
-    attr_type: bool,
-    attr: dict[str, Any] | None = None,
-    cdata: bool = False,
+    key:        str,
+    val:        int | float | numbers.Number | datetime.datetime | datetime.date | str,
+    attr_type:  bool,
+    attr:       dict[str, Any] | None = None,
+    cdata:      bool                  = False,
 ) -> str:
-    """Converts a number, string, or datetime into an XML element"""
-    if attr is None:
-        attr = {}
+    """Converts a number, datetime, or string into an XML element"""
+    if  attr is None:
+        attr  = {}
     key, attr = make_valid_xml_name(key, attr)
-
-    # Convert datetime to isoformat string
-    if hasattr(val, "isoformat") and isinstance(val, (datetime.datetime, datetime.date)):
-        val = val.isoformat()
-
-    if attr_type:
-        attr["type"] = get_xml_type(val)
-    attr_string = make_attrstring(attr)
-    return f"<{key}{distance(attr_string)}{attr_string}>{wrap_cdata(val) if cdata else escape_xml(val)}</{key}>"
+    if  isinstance(val, (datetime.datetime, datetime.date)) and hasattr(val, "isoformat"):
+        val   = val.isoformat()
+    if  attr_type:
+        attr["type"]    = get_xml_type(val)
+    attr_string         = make_attrstring(attr)
+    if  cdata:
+        formatted_val   = wrap_cdata(val)
+    else:
+        formatted_val   = escape_xml(val)
+    return '<'  + key + distance(attr_string) + attr_string + '>'   \
+                + formatted_val                                     \
+        +  '</' + key                                       + '>'
 
 def convert_bool(
-    key: str, val: bool, attr_type: bool, attr: dict[str, Any] | None = None, cdata: bool = False
+    key:        str,
+    val:        bool,
+    attr_type:  bool,
+    attr:       dict[str, Any] | None   = None,
+    # cdata:      bool                    = False               only for general convert fct
 ) -> str:
     """Converts a boolean into an XML element"""
-    if attr is None:
+    if  attr is None:
         attr = {}
     key, attr = make_valid_xml_name(key, attr)
-
-    if attr_type:
-        attr["type"] = get_xml_type(val)
-    attr_string = make_attrstring(attr)
-    return f"<{key}{distance(attr_string)}{attr_string}>{str(val).lower()}</{key}>"
+    if  attr_type:
+        attr["type"] = get_xml_type(val)      # "bool"
+    attr_string      = make_attrstring(attr)
+    return '<'  + key + distance(attr_string) + attr_string + '>'   \
+                + str(val).lower()                                  \
+         + '</' + key                                       + '>'
 
 def convert_none(
     key:        str,
     attr_type:  bool,
     attr:       dict[str, Any] | None   = None,
-    cdata:      bool                    = False
+    # cdata:      bool                    = False               only for general convert fct
 ) -> str:
     """Converts a null value into an XML element"""
     if  attr is None:
         attr = {}
     key, attr = make_valid_xml_name(key, attr)
     if  attr_type:
-        attr["type"]  = "null"                # get_xml_type(None)
+        attr["type"]  = get_xml_type(None)    # "null"
     attr_string       = make_attrstring(attr)
-    return '<'  + key + distance(attr_string) + attr_string + '>' \
+    return '<'  + key + distance(attr_string) + attr_string + '>'   \
          + '</' + key                                       + '>'
 
 # ##############################################
@@ -840,7 +850,7 @@ def dicttoxml(
     cdata:          bool                    = False,                # default is False; wrap string values into CDATA sections
     ids:            list[int]      | None   = None,                 # default is None / [];  elements get unique ids
     xml_namespaces: dict[str, Any] | None   = None,                 # default is None / {}
-    prolog:         str                     = '<?xml version="1.0" encoding="UTF-8" ?>'
+    prolog:         str                     = PROLOG
 ) -> bytes:
     '''docstring: see top of file'''
     if  xpath_format:
