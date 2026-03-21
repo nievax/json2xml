@@ -315,6 +315,14 @@ def make_attrstring(attr: dict[str, Any])               -> str:
     # TODO refactoring
     return " ".join([f'{k}="{escape_xml(v)}"' for k, v in attr.items()])
 
+def distance(attributes: str)                           -> str:
+    '''docstring'''
+    if      attributes   == '':
+            attr_distance = ''
+    else:
+            attr_distance = ' '
+    return  attr_distance
+
 def key_is_valid_xml(key: str)                          -> bool:
     """
     Check if a key is a valid XML name.
@@ -472,13 +480,14 @@ def dict2xml_str(
     parent: str = "",
     list_headers: bool = False,
 ) -> str:
+    
     """
     parse dict2xml
     """
+
     ids: list[str] = []  # initialize list of unique ids
     ", ".join(str(key) for key in item)
     subtree = ""  # Initialize subtree with default empty string
-
     if attr_type:
         attr["type"] = get_xml_type(item)
     val_attr: dict[str, str] = item.pop("@attrs", attr)  # update attr with custom @attr if exists
@@ -493,28 +502,15 @@ def dict2xml_str(
         subtree = convert(
             rawitem, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, item_name, list_headers=list_headers
         )
-
     if parent_is_list and list_headers:
         if len(val_attr) > 0 and not wrap_array_items:
             attrstring = make_attrstring(val_attr)
-            # TODO apply this
-            # if  attr_string  != '':
-            #     distance     = ' '
-            # else:   # attr_string  == ''
-            #     distance     = ''
-            return f"<{parent}{attrstring}>{subtree}</{parent}>"
+            return f"<{parent}{distance(attrstring)}{attrstring}>{subtree}</{parent}>"
         return f"<{parent}>{subtree}</{parent}>"
     elif item.get("@flat", False) or (parent_is_list and not wrap_array_items):
         return subtree
-
     attrstring = make_attrstring(val_attr)
-    # TODO apply this
-    # if  attr_string  != '':
-    #     distance     = ' '
-    # else:   # attr_string  == ''
-    #     distance     = ''
-
-    return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
+    return f"<{item_name}{distance(attrstring)}{attrstring}>{subtree}</{item_name}>"
 
 def list2xml_str(
     attr_type: bool,
@@ -552,12 +548,7 @@ def list2xml_str(
     elif list_headers:
         return subtree
     attrstring = make_attrstring(attr)
-    # TODO apply this
-    # if  attr_string  != '':
-    #     distance     = ' '
-    # else:   # attr_string  == ''
-    #     distance     = ''
-    return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
+    return f"<{item_name}{distance(attrstring)}{attrstring}>{subtree}</{item_name}>"
 
 # ##############################################
 # TODO refactoring
@@ -800,12 +791,7 @@ def convert_kv(
     if attr_type:
         attr["type"] = get_xml_type(val)
     attr_string = make_attrstring(attr)
-    # TODO apply this
-    # if  attr_string  != '':
-    #     distance     = ' '
-    # else:   # attr_string  == ''
-    #     distance     = ''
-    return f"<{key}{attr_string}>{wrap_cdata(val) if cdata else escape_xml(val)}</{key}>"
+    return f"<{key}{distance(attr_string)}{attr_string}>{wrap_cdata(val) if cdata else escape_xml(val)}</{key}>"
 
 def convert_bool(
     key: str, val: bool, attr_type: bool, attr: dict[str, Any] | None = None, cdata: bool = False
@@ -818,12 +804,7 @@ def convert_bool(
     if attr_type:
         attr["type"] = get_xml_type(val)
     attr_string = make_attrstring(attr)
-    # TODO apply this
-    # if  attr_string  != '':
-    #     distance     = ' '
-    # else:   # attr_string  == ''
-    #     distance     = ''
-    return f"<{key}{attr_string}>{str(val).lower()}</{key}>"
+    return f"<{key}{distance(attr_string)}{attr_string}>{str(val).lower()}</{key}>"
 
 def convert_none(
     key:        str,
@@ -836,14 +817,10 @@ def convert_none(
         attr = {}
     key, attr = make_valid_xml_name(key, attr)
     if  attr_type:
-        attr["type"] = "null"       # get_xml_type(None)
-    attr_string      = make_attrstring(attr)
-    if  attr_string  != '':
-        distance     = ' '
-    else:   # attr_string  == ''
-        distance     = ''
-    return '<'  + key + distance + attr_string + '>' \
-         + '</' + key                          + '>'
+        attr["type"]  = "null"                # get_xml_type(None)
+    attr_string       = make_attrstring(attr)
+    return '<'  + key + distance(attr_string) + attr_string + '>' \
+         + '</' + key                                       + '>'
 
 # ##############################################
 
