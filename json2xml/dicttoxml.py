@@ -259,10 +259,10 @@ def get_xml_type(val: ELEMENT)                          -> str:
     Get the XML type of a given value.
 
     Args:
-        val (ELEMENT): The value to get the type of.
+        val (ELEMENT): the value to get the type of
 
     Returns:
-        str: The XML type.
+        str: the XML type
     """
     if val is not None:
         if type(val).__name__ in ("str", "unicode"):
@@ -279,7 +279,7 @@ def get_xml_type(val: ELEMENT)                          -> str:
             return "dict"
         if isinstance(val, Sequence):
             return "list"
-    else:
+    else:   # if val is None:
         return "null"
     return type(val).__name__
 
@@ -304,16 +304,16 @@ def escape_xml(s: str | int | float | numbers.Number)   -> str:
 
 def make_attrstring(attr: dict[str, Any])               -> str:
     """
-    Create a string of XML attributes from a dictionary.
+    Create a string of XML attributes from a dictionary
 
     Args:
-        attr (dict[str, Any]): The dictionary of attributes.
+        attr (dict[str, Any]): the dictionary of attributes
 
     Returns:
-        str: The string of XML attributes.
+        str:                   the string     of XML attributes
     """
-    attrstring = " ".join([f'{k}="{escape_xml(v)}"' for k, v in attr.items()])
-    return f'{" " if attrstring != "" else ""}{attrstring}'
+    # TODO refactoring
+    return " ".join([f'{k}="{escape_xml(v)}"' for k, v in attr.items()])
 
 def key_is_valid_xml(key: str)                          -> bool:
     """
@@ -363,12 +363,12 @@ def make_valid_xml_name(key: str, attr: dict[str, Any]) -> tuple[str, dict[str, 
 # ##############################################
 
 # TODO refactoring
-def wrap_cdata(s: str | int | float | numbers.Number) -> str:
+def wrap_cdata(s: str | int | float | numbers.Number)               -> str:
     """Wraps a string into CDATA sections"""
     s = str(s).replace("]]>", "]]]]><![CDATA[>")
     return "<![CDATA[" + s +  "]]>"
 
-# TODO
+# TODO reactivate this
 # do not delete parent parameter
 # def default_item_func(parent: str, text: str = "item")            -> str:
 #     '''how to wrap array items'''
@@ -377,7 +377,7 @@ def wrap_cdata(s: str | int | float | numbers.Number) -> str:
 # ##############################################
 
 # XPath 3.1 json-to-xml conversion
-def get_xpath31_tag_name(val: Any)                                -> str:
+def get_xpath31_tag_name(val: Any)                                  -> str:
     """
     Determine XPath 3.1 tag name by Python type
     See: https://www.w3.org/TR/xpath-functions-31/#func-json-to-xml
@@ -410,7 +410,7 @@ def get_xpath31_tag_name(val: Any)                                -> str:
             return_value = "string"
     return  return_value
 
-def convert_to_xpath31(  obj: Any, parent_key: str | None = None) -> str:
+def convert_to_xpath31(  obj: Any, parent_key: str | None = None)   -> str:
     """
     Convert a Python object to XPath 3.1 json-to-xml format
 
@@ -451,13 +451,14 @@ def convert_to_xpath31(  obj: Any, parent_key: str | None = None) -> str:
     return return_value
 
 # ##############################################
-# TODO refactoring
 
-def is_primitive_type(val: Any) -> bool:
+def is_primitive_type(val: Any)                                     -> bool:
     '''docstring'''
-    t = get_xml_type(val)
-    return t in {"str", "int", "float", "bool", "number", "null"}
+    xml_type        = get_xml_type(val)
+    primitive_types = {"str", "int", "float", "bool", "number", "null"}
+    return xml_type in primitive_types
 
+# TODO refactoring
 def dict2xml_str(
     attr_type: bool,
     attr: dict[str, Any],
@@ -496,12 +497,22 @@ def dict2xml_str(
     if parent_is_list and list_headers:
         if len(val_attr) > 0 and not wrap_array_items:
             attrstring = make_attrstring(val_attr)
+            # TODO apply this
+            # if  attr_string  != '':
+            #     distance     = ' '
+            # else:   # attr_string  == ''
+            #     distance     = ''
             return f"<{parent}{attrstring}>{subtree}</{parent}>"
         return f"<{parent}>{subtree}</{parent}>"
     elif item.get("@flat", False) or (parent_is_list and not wrap_array_items):
         return subtree
 
     attrstring = make_attrstring(val_attr)
+    # TODO apply this
+    # if  attr_string  != '':
+    #     distance     = ' '
+    # else:   # attr_string  == ''
+    #     distance     = ''
 
     return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
 
@@ -541,6 +552,11 @@ def list2xml_str(
     elif list_headers:
         return subtree
     attrstring = make_attrstring(attr)
+    # TODO apply this
+    # if  attr_string  != '':
+    #     distance     = ' '
+    # else:   # attr_string  == ''
+    #     distance     = ''
     return f"<{item_name}{attrstring}>{subtree}</{item_name}>"
 
 # ##############################################
@@ -553,7 +569,7 @@ def convert(
     # array_items_wrap:       Callable[[str], str],
     cdata:                  bool,
     wrap_array_items:       bool,
-    custom_array_item_wrap: str,                # TODO new
+    custom_array_item_wrap: str,
     parent:                 str     =   "root",
     list_headers:           bool    =    False,
 ) -> str:
@@ -784,6 +800,11 @@ def convert_kv(
     if attr_type:
         attr["type"] = get_xml_type(val)
     attr_string = make_attrstring(attr)
+    # TODO apply this
+    # if  attr_string  != '':
+    #     distance     = ' '
+    # else:   # attr_string  == ''
+    #     distance     = ''
     return f"<{key}{attr_string}>{wrap_cdata(val) if cdata else escape_xml(val)}</{key}>"
 
 def convert_bool(
@@ -797,20 +818,32 @@ def convert_bool(
     if attr_type:
         attr["type"] = get_xml_type(val)
     attr_string = make_attrstring(attr)
+    # TODO apply this
+    # if  attr_string  != '':
+    #     distance     = ' '
+    # else:   # attr_string  == ''
+    #     distance     = ''
     return f"<{key}{attr_string}>{str(val).lower()}</{key}>"
 
 def convert_none(
-    key: str, attr_type: bool, attr: dict[str, Any] | None = None, cdata: bool = False
+    key:        str,
+    attr_type:  bool,
+    attr:       dict[str, Any] | None   = None,
+    cdata:      bool                    = False
 ) -> str:
     """Converts a null value into an XML element"""
-    if attr is None:
+    if  attr is None:
         attr = {}
     key, attr = make_valid_xml_name(key, attr)
-
-    if attr_type:
-        attr["type"] = get_xml_type(None)
-    attr_string = make_attrstring(attr)
-    return f"<{key}{attr_string}></{key}>"
+    if  attr_type:
+        attr["type"] = "null"       # get_xml_type(None)
+    attr_string      = make_attrstring(attr)
+    if  attr_string  != '':
+        distance     = ' '
+    else:   # attr_string  == ''
+        distance     = ''
+    return '<'  + key + distance + attr_string + '>' \
+         + '</' + key                          + '>'
 
 # ##############################################
 
