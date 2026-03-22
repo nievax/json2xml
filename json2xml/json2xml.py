@@ -21,12 +21,12 @@ class Json2xml:
         cdata:          bool        = False,    # default is False; wrap string values into CDATA sections
         ids:            list | None = None,     # default is None / [];  elements get unique ids
         xml_namespaces: dict | None = None,     # default is None / {}
-        list_headers:   bool        = False,    # default is False; repeat the outer header for each array element;   TODO use for DS?
+        array_headers:  bool        = False,    # default is False; repeat the outer header for each array element;   TODO use for DS?
 
         wrap_array_items: bool      = True,     # default is True;  wrap each array item into a tag;                  TODO use for DS?
         # array_items_wrap: fct       = ??,     # default is default_item_func / "item";                              TODO make this work
         custom_array_item_wrap: str = "node",
-        
+
         pretty:         bool        = True,     # new lines + indenting; False gives no string, but bytes
     ):
         self.data                   = data
@@ -40,7 +40,7 @@ class Json2xml:
         self.cdata                  = cdata
         self.ids                    = ids
         self.xml_namespaces         = xml_namespaces
-        self.list_headers           = list_headers
+        self.array_headers          = array_headers
         self.pretty                 = pretty
 
     def to_xml(self) -> Any | None:
@@ -54,7 +54,7 @@ class Json2xml:
                 wrap_array_items        = self.wrap_array_items,
                 # array_items_wrap      = self.array_items_wrap,
                 custom_array_item_wrap  = self.custom_array_item_wrap,
-                list_headers            = self.list_headers,
+                array_headers           = self.array_headers,
                 attr_type               = self.attr_type,
                 cdata                   = self.cdata,
                 ids                     = self.ids,
