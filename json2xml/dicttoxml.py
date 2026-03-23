@@ -58,7 +58,7 @@
             "Bike": [
                 {'frame_color': 'red'},
                 {'frame_color': 'green'}
-            ]}
+            ]
 
         .. xml
 

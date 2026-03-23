@@ -2,5 +2,10 @@
     "login":      "mojombo",
     "id":          2,
     "avatar_url": "https://example.com",
-    "bike":         ["blue", "green"]
+    "bike":         ["blue",
+                    "green"
+                    ],
+    "Bike":         [   {"frame_color": "red"},
+                        {"frame_color": "green"}
+                    ]
 }

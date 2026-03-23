@@ -11,37 +11,21 @@ class Json2xml:
     def __init__(
         self,
         data:           dict[str, Any] | list[Any] | None   = None,
-
-        xpath_format:   bool        = False,    # default is False
-
-        use_root:       bool        = True,     # default is True;  the output is wrapped into an XML root element
-        root:           str         = "all",    # default is "root"
-
-        attr_type:      bool        = False,    # default is True;  display data type
-        cdata:          bool        = False,    # default is False; wrap string values into CDATA sections
-        ids:            list | None = None,     # default is None / [];  elements get unique ids
-        xml_namespaces: dict | None = None,     # default is None / {}
-        array_headers:  bool        = False,    # default is False; repeat the outer header for each array element;   TODO use for DS?
-
-        wrap_array_items: bool      = True,     # default is True;  wrap each array item into a tag;                  TODO use for DS?
-        # array_items_wrap: fct       = ??,     # default is default_item_func / "item";                              TODO make this work
-        custom_array_item_wrap: str = "node",
-
-        pretty:         bool        = True,     # new lines + indenting; False gives no string, but bytes
+        config:         dict                                = {},
     ):
         self.data                   = data
-        self.xpath_format           = xpath_format
-        self.use_root               = use_root
-        self.root                   = root
-        self.attr_type              = attr_type
-        self.wrap_array_items       = wrap_array_items
-        # self.array_items_wrap       = array_items_wrap,
-        self.custom_array_item_wrap = custom_array_item_wrap
-        self.cdata                  = cdata
-        self.ids                    = ids
-        self.xml_namespaces         = xml_namespaces
-        self.array_headers          = array_headers
-        self.pretty                 = pretty
+        self.xpath_format           = config["xpath_format"]            # bool          default is False
+        self.use_root               = config["use_root"]                # bool          default is True;  the output is wrapped into an XML root element
+        self.custom_root            = config["custom_root"]             # str           default is "root"
+        self.attr_type              = config["attr_type"]               # bool          default is True;  display data type
+        self.wrap_array_items       = config["wrap_array_items"]        # bool          default is True;  wrap each array item into a tag;                  TODO use for DS?
+        # self.array_items_wrap       = array_items_wrap,               # fct           default is default_item_func / "item";                              TODO make this work
+        self.custom_array_item_wrap = config["custom_array_item_wrap"]  # see above
+        self.cdata                  = config["cdata"]                   # bool          default is False; wrap string values into CDATA sections
+        self.ids                    = config["ids"]                     # list | None   default is None / [];  elements get unique ids
+        self.xml_namespaces         = config["xml_namespaces"]          # dict | None   default is None / {}
+        self.array_headers          = config["array_headers"]           # bool          default is False; repeat the outer header for each array element;   TODO use for DS?
+        self.pretty                 = config["pretty"]                  # bool          default is True;  new lines + indenting; False gives no string, but bytes
 
     def to_xml(self) -> Any | None:
         """Convert to xml"""
@@ -50,7 +34,7 @@ class Json2xml:
                 self.data,
                 xpath_format            = self.xpath_format,
                 use_root                = self.use_root,
-                custom_root             = self.root,
+                custom_root             = self.custom_root,
                 wrap_array_items        = self.wrap_array_items,
                 # array_items_wrap      = self.array_items_wrap,
                 custom_array_item_wrap  = self.custom_array_item_wrap,
@@ -62,9 +46,11 @@ class Json2xml:
             )
             if self.pretty:
                 try:
-                    result = parseString(xml_data).toprettyxml(encoding="UTF-8").decode()
+                    return_name = parseString(xml_data).toprettyxml(encoding="UTF-8").decode()
                 except ExpatError          as   exc:
                     raise InvalidDataError from exc
-                return result
-            return xml_data
-        return None
+            else:
+                return_name = xml_data
+        else:
+                return_name = None
+        return  return_name
