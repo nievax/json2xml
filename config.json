@@ -1,13 +1,17 @@
 {
     "xpath_format"                : false,
+
     "use_root"                    : true,
-    "custom_root"                 : "blab",
+    "custom_root"                 : "blub",
+
     "attr_type"                   : false,
     "cdata"                       : false,
     "ids"                         : null,
     "xml_namespaces"              : null,
-    "wrap_array_items"            : false,
-    "custom_array_item_wrap"      : "node",
+
+    "wrap_array_items"            : true,
+    "custom_array_item_wrap"      : "nude",
+    
     "array_headers"               : false,
     "pretty"                      : true
 }

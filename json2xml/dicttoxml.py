@@ -260,25 +260,25 @@ def get_xml_type(val: ELEMENT)                          -> str:
     """
 
     if val is None:
-            return_name =           "null"
+            return_value =          "null"
     else:                          # val is not None:
         if  isinstance(val,          numbers.Number):
-            return_name =           "number"
+            return_value =          "number"
         if  isinstance(val,          dict):
-            return_name =           "dict"
+            return_value =          "dict"
         if  isinstance(val,          Sequence):
-            return_name =           "list"
+            return_value =          "list"
         if  type(val).__name__ in  ("str", "unicode"):
-            return_name =           "str"
+            return_value =          "str"
         if  type(val).__name__ in  ("int", "long"):
-            return_name =           "int"
+            return_value =          "int"
         if  type(val).__name__ ==   "float":
-            return_name =           "float"
+            return_value =          "float"
         if  type(val).__name__ ==   "bool":
-            return_name =           "bool"
+            return_value =          "bool"
         else:
-            return_name =            type(val).__name__
-    return  return_name
+            return_value =           type(val).__name__
+    return  return_value
 
 def escape_xml(s: str | int | float | numbers.Number)   -> str:
     """
@@ -507,15 +507,15 @@ def dict2xml_str(
     if parent_is_list and array_headers:
         if len(val_attr) > 0 and not wrap_array_items:
             attrstring   = make_attrstring(val_attr)
-            return_name  = '<' + parent    + distance(attrstring) + attrstring + '>' + subtree + '</' + parent    + '>'
+            return_value  = '<' + parent    + distance(attrstring) + attrstring + '>' + subtree + '</' + parent    + '>'
         else:
-            return_name  = '<' + parent + '>'                                        + subtree + '</' + parent    + '>'
+            return_value  = '<' + parent + '>'                                        + subtree + '</' + parent    + '>'
     elif item.get("@flat", False) or (parent_is_list and not wrap_array_items):
-            return_name  =                                                             subtree
+            return_value  =                                                             subtree
     else:
             attrstring   = make_attrstring(val_attr)
-            return_name  = '<' + item_name + distance(attrstring) + attrstring + '>' + subtree + '</' + item_name + '>'
-    return  return_name
+            return_value  = '<' + item_name + distance(attrstring) + attrstring + '>' + subtree + '</' + item_name + '>'
+    return  return_value
 
 def list2xml_str(
     item:                   Sequence[Any],
@@ -556,13 +556,13 @@ def list2xml_str(
     if flat             \
     or array_headers    \
     or (len(item) > 0 and is_primitive_type(item[0]) and not wrap_array_items):
-        return_name = subtree
+        return_value = subtree
     else:
         attrstring  = make_attrstring(attr)
-        return_name = '<'  + item_name + distance(attrstring) + attrstring  + '>'   \
+        return_value = '<'  + item_name + distance(attrstring) + attrstring  + '>'   \
                            + subtree                                                \
                     + '</' + item_name                                      + '>'
-    return return_name
+    return return_value
 
 # ##############################################
 

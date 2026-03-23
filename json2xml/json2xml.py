@@ -4,6 +4,9 @@ from typing             import Any
 from defusedxml.minidom import parseString              # for fct to_xml
 from json2xml           import dicttoxml                # for fct to_xml
 from .utils             import InvalidDataError         # for fct to_xml
+from .utils             import readfromjson
+
+config = readfromjson("config.json")
 
 class Json2xml:
     """Wrapper class to convert the data to xml"""
@@ -11,7 +14,6 @@ class Json2xml:
     def __init__(
         self,
         data:           dict[str, Any] | list[Any] | None   = None,
-        config:         dict                                = {},
     ):
         self.data                   = data
         self.xpath_format           = config["xpath_format"]            # bool          default is False
@@ -46,11 +48,11 @@ class Json2xml:
             )
             if self.pretty:
                 try:
-                    return_name = parseString(xml_data).toprettyxml(encoding="UTF-8").decode()
+                    return_value = parseString(xml_data).toprettyxml(encoding="UTF-8").decode()
                 except ExpatError          as   exc:
                     raise InvalidDataError from exc
             else:
-                return_name = xml_data
+                    return_value =             xml_data
         else:
-                return_name = None
-        return  return_name
+                    return_value = None
+        return      return_value
