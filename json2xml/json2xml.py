@@ -28,36 +28,50 @@ class Json2xml:
         self.xml_namespaces         = config["xml_namespaces"]          # dict | None   default is None / {}
         self.array_headers          = config["array_headers"]           # bool          default is False; repeat the outer header for each array element;   TODO use for DS?
         self.pretty                 = config["pretty"]                  # bool          default is True;  new lines + indenting; False gives no string, but bytes
+        self.only_read_folder       = config["only_read_folder"]        # str           default is ""
+        self.not_read_folder        = config["not_read_folder"]         # str           default is ""
+
+    def exclude(self, dictio: dict, not_read_folder: str)                        -> dict:
+        '''substract folder from dict'''
+        smaller_dict:  dict = {}
+        for    element in dictio:
+            if element != not_read_folder:
+                smaller_dict[element] = dictio[element]
+        return  smaller_dict
 
     def to_xml(self) -> Any | None:
         """Convert to xml"""
         if  self.data:
-            if   isinstance(self.data, dict):     # do not read section "context" from CV self.data (gives Error)!
-                # TODO this is only necessary for self.pretty!:
-                content                 = self.data['hasTopConcept']
-            else:         # if isinstance(self.data, list):
-                content                 = self.data
-            xml_data                    = dicttoxml.dicttoxml(
-                content,
-                xpath_format            = self.xpath_format,
-                use_root                = self.use_root,
-                custom_root             = self.custom_root,
-                wrap_array_items        = self.wrap_array_items,
-                # array_items_wrap      = self.array_items_wrap,
-                custom_array_item_wrap  = self.custom_array_item_wrap,
-                array_headers           = self.array_headers,
-                attr_type               = self.attr_type,
-                cdata                   = self.cdata,
-                ids                     = self.ids,
-                xml_namespaces          = self.xml_namespaces,
+            # TODO this is only necessary for self.pretty!:
+            content                             = self.data
+            if   isinstance(self.data, dict):
+                if      self.only_read_folder  != "":
+                    if  self.only_read_folder  in self.data:
+                        content                 =              self.data[self.only_read_folder]
+                elif    self.not_read_folder   != "":
+                        content                 = self.exclude(self.data, self.not_read_folder)
+            xml_data                            = dicttoxml.dicttoxml(
+                        content,
+                xpath_format                    = self.xpath_format,
+                use_root                        = self.use_root,
+                custom_root                     = self.custom_root,
+                wrap_array_items                = self.wrap_array_items,
+                # array_items_wrap              = self.array_items_wrap,
+                custom_array_item_wrap          = self.custom_array_item_wrap,
+                array_headers                   = self.array_headers,
+                attr_type                       = self.attr_type,
+                cdata                           = self.cdata,
+                ids                             = self.ids,
+                xml_namespaces                  = self.xml_namespaces,
             )
             if self.pretty:
                 try:
-                    return_value = parseString(xml_data).toprettyxml(encoding="UTF-8").decode()
-                except ExpatError          as   exc:
-                    raise InvalidDataError from exc
+                    return_value                = parseString(xml_data).toprettyxml(encoding="UTF-8").decode()
+                except ExpatError              as exc:
+                    raise InvalidDataError   from exc
             else:
-                    return_value =             xml_data
+                    return_value                =             xml_data
         else:
-                    return_value = None
+                    return_value                = None
         return      return_value
+

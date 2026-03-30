@@ -5,6 +5,9 @@
     "use_root"                  : false,
     "custom_root"               : "isComposedBy",
 
+    "only_read_folder"          : "",
+     "not_read_folder"          : "@context",
+
     "wrap_array_items"          : true,
     "custom_array_item_wrap"    : "node",
 
