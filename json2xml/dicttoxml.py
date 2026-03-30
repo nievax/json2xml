@@ -923,25 +923,7 @@ def dicttoxml(
         output          = prolog + part2
     else:                       # not xpath_format
         output          = ''
-        namespace_str   = ''
-        if  xml_namespaces is None:
-            xml_namespaces = {}
-        for     prefix in xml_namespaces:
-            if  prefix == 'xsi':
-                for schema_att in xml_namespaces[prefix]:
-                    if schema_att == 'schemaInstance':
-                        ns = xml_namespaces[prefix]['schemaInstance']
-                        namespace_str += f' xmlns:{prefix}="{ns}"'
-                    elif schema_att == 'schemaLocation':
-                        ns = xml_namespaces[prefix][schema_att]
-                        namespace_str += f' xsi:{schema_att}="{ns}"'
-            elif prefix == 'xmlns':
-                # xmns needs no prefix
-                ns              = xml_namespaces[prefix]
-                namespace_str += f' xmlns="{ns}"'
-            else:
-                ns              = xml_namespaces[prefix]
-                namespace_str += f' xmlns:{prefix}="{ns}"'
+        namespace_str   = set_namespace_str(xml_namespaces)
         if  use_root:
             output_elem = convert(
                 obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
@@ -953,5 +935,23 @@ def dicttoxml(
             custom_root = ''
             output_elem = convert(
                 obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
-            output      = output_elem       # no prolog here, since it needs custom root
+            output      = output_elem       # no prolog here, since it needs custom root; TODO really?
     return "".join(output).encode("utf-8")
+
+def set_namespace_str(xml_namespaces):
+    '''set namespace string from xml_namespaces'''
+    namespace_str                = ''
+    if                xml_namespaces is None:
+                      xml_namespaces = {}
+    for     prefix in xml_namespaces:
+        if  prefix ==  'xmlns':
+                    namespace_str                   += ' ' + 'xmlns'                           + '="' + xml_namespaces[prefix]             + '"'
+        elif prefix == 'xsi':
+            for     schema_att in xml_namespaces[prefix]:
+                if   schema_att == 'schemaInstance':
+                    namespace_str                   += ' ' + 'xmlns' + ':'  + 'xsi'            + '="' + xml_namespaces[prefix][schema_att] + '"'
+                else: # schema_att == 'schemaLocation', 'noNamespaceSchemaLocation':
+                    namespace_str                   += ' ' + 'xsi'   + ':'  +  schema_att      + '="' + xml_namespaces[prefix][schema_att] + '"'
+        else:
+                    namespace_str                   += ' ' + 'xmlns' + ':'  +  prefix          + '="' + xml_namespaces[prefix]             + '"'
+    return          namespace_str

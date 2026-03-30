@@ -11,6 +11,9 @@
     "attr_type"                 : false,
     "cdata"                     : false,
     "ids"                       : null,
-    "xml_namespaces"            : null,
+    "xml_namespaces"            : {"xsi":{"schemaInstance":            "http://www.w3.org/2001/XMLSchema-instance",
+                                          "noNamespaceSchemaLocation": "controlledvocabulary.xsd"
+                                            }
+                                },
     "array_headers"             : false
 }

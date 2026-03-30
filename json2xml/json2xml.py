@@ -47,6 +47,8 @@ class Json2xml:
                 xml_namespaces          = self.xml_namespaces,
             )
             if self.pretty:
+                # print(xml_data)
+                # return_value = xml_data
                 try:
                     return_value = parseString(xml_data).toprettyxml(encoding="UTF-8").decode()
                 except ExpatError          as   exc:
