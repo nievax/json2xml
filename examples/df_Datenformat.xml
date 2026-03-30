@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<isComposedBy>
+	<id>https://w3id.org/iqb/v85/df/</id>
+	<type>ConceptScheme</type>
+	<title>
+		<de>VerbundFDB - Kontrolliertes Vokabular - Datenformat</de>
+		<en>VerbundFDB - Controlled Vocabulary - Data Format</en>
+	</title>
+	<description>
+		<de>Hierbei handelt es sich um ein kontrolliertes Vokabular zu technischen Informationen zum Datensatz und beschreibt die Datenressource.
+
+Zitation: VerbundFDB: Datenformat Bildungsforschung. Version 1.0. Verfügbar unter https://w3id.org/iqb/v85/df/.
+
+Provenienz: Es handelt sich hierbei um ein kontrolliertes Vokabular, welches vom VerbundFDB auf Grundlage von da|ra 4.0 (Resource Type) entwickelt wurde.
+
+Lizenz: CC0 1.0 Universell (CC0 1.0) / Public Domain Dedication (https://creativecommons.org/publicdomain/zero/1.0/deed.de)</de>
+		<en>This is a controlled vocabulary for technical information on the data set and describes the data resource.
+
+Citation: VerbundFDB: Data Format Educational Research. Version 1.0. Retrieved from https://w3id.org/iqb/v85/df/.
+
+Provenance: This is a controlled vocabulary developed by VerbundFDB- on basis of da|ra 4.0 (Resource Type).
+
+License: CC0 1.0 Universell (CC0 1.0) / Public Domain Dedication (https://creativecommons.org/publicdomain/zero/1.0/deed.de) </en>
+	</description>
+	<license>
+		<id>https://creativecommons.org/publicdomain/zero/1.0/deed.de</id>
+	</license>
+	<hasTopConcept>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/1</id>
+			<prefLabel>
+				<de>Audiovisuell</de>
+				<en>Audiovisual</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/2</id>
+			<prefLabel>
+				<de>Datenkollektion</de>
+				<en>Collection</en>
+			</prefLabel>
+			<definition>
+				<de>=Sammlung</de>
+				<en>=Collection</en>
+			</definition>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/3</id>
+			<prefLabel>
+				<de>DataPaper</de>
+				<en>Data Paper</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/4</id>
+			<prefLabel>
+				<de>Datensatz</de>
+				<en>Dataset</en>
+			</prefLabel>
+			<definition>
+				<de>Hierunter fallen auch Logdaten (Hinweis: Im Metadatenschema daIra 4.0 kann bei der Auswahl des Resource Type 'Datensatz' als Spezifizierung bei Resource Tpe Free 'Logdaten' eingetragen werden.).</de>
+				<en>This also includes logfiles (Note: In the metadata schema daIra 4.0, when selecting the Resource Type 'Dataset', 'logfiles' can be entered as a specification for Resource Type Free).</en>
+			</definition>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/5</id>
+			<prefLabel>
+				<de>Event</de>
+				<en>Event</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/6</id>
+			<prefLabel>
+				<de>Bild</de>
+				<en>Image</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/7</id>
+			<prefLabel>
+				<de>Interaktives Objekt</de>
+				<en>Interactive Resource</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/8</id>
+			<prefLabel>
+				<de>Modell</de>
+				<en>Model</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/9</id>
+			<prefLabel>
+				<de>Physisches Objekt</de>
+				<en>Physical Object</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/10</id>
+			<prefLabel>
+				<de>Service</de>
+				<en>Service</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/11</id>
+			<prefLabel>
+				<de>Software</de>
+				<en>Software</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/12</id>
+			<prefLabel>
+				<de>Audio</de>
+				<en>Sound</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/13</id>
+			<prefLabel>
+				<de>Text</de>
+				<en>Text</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/14</id>
+			<prefLabel>
+				<de>Workflow</de>
+				<en>Workflow</en>
+			</prefLabel>
+		</node>
+		<node>
+			<id>https://w3id.org/iqb/v85/df/15</id>
+			<prefLabel>
+				<de>andere</de>
+				<en>Other</en>
+			</prefLabel>
+		</node>
+	</hasTopConcept>
+</isComposedBy>
