@@ -248,7 +248,7 @@ ELEMENT = Union[
     dict[str, Any],
 ]
 
-def get_xml_type(val: ELEMENT)                          -> str:
+def get_xml_type(val: ELEMENT)                                      -> str:
     """
     Get the XML type of a given value
 
@@ -280,7 +280,7 @@ def get_xml_type(val: ELEMENT)                          -> str:
             return_value =           type(val).__name__
     return  return_value
 
-def escape_xml(s: str | int | float | numbers.Number)   -> str:
+def escape_xml(s: str | int | float | numbers.Number)               -> str:
     """
     Escape a string for use in XML
 
@@ -299,7 +299,7 @@ def escape_xml(s: str | int | float | numbers.Number)   -> str:
         s = s.replace(">", "&gt;")
     return str(s)
 
-def make_attrstring(attr: dict[str, Any])               -> str:
+def make_attrstring(attr: dict[str, Any])                           -> str:
     """
     Create a string of XML attributes from a dictionary
 
@@ -312,7 +312,7 @@ def make_attrstring(attr: dict[str, Any])               -> str:
     # TODO refactoring
     return " ".join([f'{k}="{escape_xml(v)}"' for k, v in attr.items()])
 
-def distance(attributes: str)                           -> str:
+def distance(attributes: str)                                       -> str:
     '''docstring'''
     if      attributes   == '':
             attr_distance = ''
@@ -320,7 +320,7 @@ def distance(attributes: str)                           -> str:
             attr_distance = ' '
     return  attr_distance
 
-def key_is_valid_xml(key: str)                          -> bool:
+def key_is_valid_xml(key: str)                                      -> bool:
     """
     Check if a key is a valid XML name.
 
@@ -341,7 +341,7 @@ def key_is_valid_xml(key: str)                          -> bool:
     except Exception:  # minidom does not implement exceptions well
         return False
 
-def make_valid_xml_name(key: str, attr: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+def make_valid_xml_name(key: str, attr: dict[str, Any])             -> tuple[str, dict[str, Any]]:
     """Tests an XML name and fixes it if invalid"""
 
     # preparations:
@@ -480,7 +480,7 @@ def dict2xml_str(
     parent_is_list:         bool,
     parent:                 str  = "",
     array_headers:          bool = False,
-) -> str:
+)                                                                   -> str:
 
     """parse dict2xml"""
 
@@ -527,8 +527,8 @@ def list2xml_str(
     # array_items_wrap: Callable[[str], str],
     custom_array_item_wrap: str,
     array_headers:          bool = False,
-) -> str:
-    
+)                                                                   -> str:
+
     '''docstring'''
 
     ids:  list[str]  = []  # initialize list of unique ids
@@ -874,7 +874,7 @@ def convert_none(
     attr_type:  bool,
     attr:       dict[str, Any] | None   = None,
     cdata:      bool                    = False               # is used in fct calls
-) -> str:
+)                                                                   -> str:
     """Converts a null value into an XML element"""
 
     if  attr is None:
@@ -905,7 +905,7 @@ def dicttoxml(
     ids:            list[int]      | None   = None,                 # default is None / [];  elements get unique ids
     xml_namespaces: dict[str, Any] | None   = None,                 # default is None / {}
     prolog:         str                     = PROLOG
-) -> bytes:
+)                                                                   -> bytes:
     '''docstring: see top of file'''
     if  xpath_format:
         xml_content     = convert_to_xpath31(obj)
@@ -921,24 +921,21 @@ def dicttoxml(
                                                         + xml_content   \
                                             + '</map>'
         output          = prolog + part2
-    else:                       # not xpath_format
+    else:                           # not xpath_format
         output          = ''
         namespace_str   = set_namespace_str(xml_namespaces)
-        if  use_root:
-            output_elem = convert(
-                obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
-            output      = prolog                                            \
-                        + '<'   + custom_root + ' ' + namespace_str + '>'   \
-                                + output_elem                               \
-                        + '</'  + custom_root                       + '>'
-        else:                   # not use_root
-            custom_root = ''
-            output_elem = convert(
-                obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
-            output      = output_elem       # no prolog here, since it needs custom root; TODO really?
+        if not use_root:            # TODO instead of this, integrate it into fct as default value:
+            custom_root = 'content'     # custom root is needed in every case
+                                        # to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
+        output_elem = convert(
+            obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
+        output      = prolog                                            \
+                    + '<'   + custom_root + ' ' + namespace_str + '>'   \
+                    + output_elem                                       \
+                    + '</'  + custom_root                       + '>'
     return "".join(output).encode("utf-8")
 
-def set_namespace_str(xml_namespaces):
+def set_namespace_str(xml_namespaces)                               -> str:
     '''set namespace string from xml_namespaces'''
     namespace_str                = ''
     if                xml_namespaces is None:
@@ -950,7 +947,8 @@ def set_namespace_str(xml_namespaces):
             for     schema_att in xml_namespaces[prefix]:
                 if   schema_att == 'schemaInstance':
                     namespace_str                   += ' ' + 'xmlns' + ':'  + 'xsi'            + '="' + xml_namespaces[prefix][schema_att] + '"'
-                else: # schema_att == 'schemaLocation', 'noNamespaceSchemaLocation':
+                elif schema_att in [           'schemaLocation',
+                                    'noNamespaceSchemaLocation', ]:
                     namespace_str                   += ' ' + 'xsi'   + ':'  +  schema_att      + '="' + xml_namespaces[prefix][schema_att] + '"'
         else:
                     namespace_str                   += ' ' + 'xmlns' + ':'  +  prefix          + '="' + xml_namespaces[prefix]             + '"'

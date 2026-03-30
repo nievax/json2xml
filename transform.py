@@ -9,14 +9,16 @@ def write_file(    path: str, cont)                      -> None:
 
 # options for config.json:
 # ==========================
-# path_to_transform = "./examples/test"
+# "path_to_transform" : "./examples/test"
 
-# path_to_transform = "./examples/booleanjson"
-# path_to_transform = "./examples/booleanjson2"
+# "path_to_transform" : "./examples/booleanjson"
+# "path_to_transform" : "./examples/booleanjson2"
 
-# path_to_transform = "./examples/bigexample"
-# path_to_transform = "./examples/light"
-# path_to_transform = "./examples/wrongjson"
+# "path_to_transform" : "./examples/bigexample"
+# "path_to_transform" : "./examples/light"
+# "path_to_transform" : "./examples/wrongjson"
+
+# "path_to_transform" : "./examples/df_Datenformat",
 
 config              = readfromjson("config.json")
 

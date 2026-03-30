@@ -31,9 +31,14 @@ class Json2xml:
 
     def to_xml(self) -> Any | None:
         """Convert to xml"""
-        if self.data:
-            xml_data = dicttoxml.dicttoxml(
-                self.data,
+        if  self.data:
+            if   isinstance(self.data, dict):     # do not read section "context" from CV self.data (gives Error)!
+                # TODO this is only necessary for self.pretty!:
+                content                 = self.data['hasTopConcept']
+            else:         # if isinstance(self.data, list):
+                content                 = self.data
+            xml_data                    = dicttoxml.dicttoxml(
+                content,
                 xpath_format            = self.xpath_format,
                 use_root                = self.use_root,
                 custom_root             = self.custom_root,
@@ -47,8 +52,6 @@ class Json2xml:
                 xml_namespaces          = self.xml_namespaces,
             )
             if self.pretty:
-                # print(xml_data)
-                # return_value = xml_data
                 try:
                     return_value = parseString(xml_data).toprettyxml(encoding="UTF-8").decode()
                 except ExpatError          as   exc:
