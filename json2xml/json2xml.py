@@ -34,8 +34,8 @@ class Json2xml:
     def exclude(self, dictio: dict, not_read_folder: str)                        -> dict:
         '''substract folder from dict'''
         smaller_dict:  dict = {}
-        for    element in dictio:
-            if element != not_read_folder:
+        for     element in dictio:
+            if  element != not_read_folder:
                 smaller_dict[element] = dictio[element]
         return  smaller_dict
 
@@ -46,7 +46,7 @@ class Json2xml:
             content                             = self.data
             if   isinstance(self.data, dict):
                 if      self.only_read_folder  != "":
-                    if  self.only_read_folder  in self.data:
+                    if  self.only_read_folder  in              self.data:
                         content                 =              self.data[self.only_read_folder]
                 elif    self.not_read_folder   != "":
                         content                 = self.exclude(self.data, self.not_read_folder)
@@ -63,6 +63,8 @@ class Json2xml:
                 cdata                           = self.cdata,
                 ids                             = self.ids,
                 xml_namespaces                  = self.xml_namespaces,
+                only_read_folder                = self.only_read_folder,
+                not_read_folder                 = self.not_read_folder,
             )
             if self.pretty:
                 try:
@@ -74,4 +76,3 @@ class Json2xml:
         else:
                     return_value                = None
         return      return_value
-

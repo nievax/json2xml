@@ -933,8 +933,11 @@ def dicttoxml(
     custom_root:    str                     = "root",               # default is "root"
 
     wrap_array_items:   bool                = True,                 # default is True;  wrap each array item into a tag
-    # array_items_wrap:   Callable[[str], str]= default_item_func,    # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
+    # array_items_wrap:   Callable[[str], str]= default_item_func,  # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
     custom_array_item_wrap: str             = 'node',
+
+    only_read_folder:   str                 = "",
+    not_read_folder:    str                 = "",
 
     array_headers:  bool                    = False,                # default is False; wrap each array item into the outer header (see also wrap_array_items)
     attr_type:      bool                    = True,                 # default is True;  display data type
@@ -944,15 +947,15 @@ def dicttoxml(
     prolog:         str                     = PROLOG
 )                                                                   -> bytes:
     '''docstring: see top of file'''
+    output              = ''
     if  xpath_format:
         output          = set_xpath(obj)
     else:
-        output          = ''
         namespace_str   = set_namespace_str(xml_namespaces)
         if  use_root is False:                    # TODO instead of this, integrate it into fct as default value:
-            if  config['only_read_folder']:
+            if  only_read_folder != '':
                 custom_root = only_read_folder
-            else:
+            else:       # if  only_read_folder == ''
                 custom_root = 'content'     # custom root is needed in every case
                                             # to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
         output_elem     = convert(
