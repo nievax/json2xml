@@ -441,14 +441,14 @@ def convert_to_xpath31(  obj: Any, parent_key: str | None = None)   -> str:
     #     return_value    =    '<null'       + ' ' + key_attr + '/>'
 
     #                 tags                    contents
-    tag_to_conent = [   [ 'null',                   '',                                         ],
+    tag_to_content = [  [ 'null',                   '',                                         ],
                         [ 'boolean',            str(obj).lower(),                               ],
                         [ 'number',                 obj,                                        ],
                         [ 'string',  escape_xml(str(obj)),                                      ],
                         [ 'map',     ''.join(convert_to_xpath31(v, k) for k, v in obj.items()), ],  # children
                         [ "array",   ''.join(convert_to_xpath31(item) for item in obj),         ],  # children
                 ]
-    for [tag, content] in tag_to_conent:
+    for [tag, content] in tag_to_content:
         if  tag_name    ==        tag:
             return_value = '<'  + tag      + ' ' + key_attr + '>'   \
                                 + content                           \
@@ -888,6 +888,43 @@ def convert_none(
 
 # ##############################################
 
+def set_xpath(obj)                                                  -> str:
+    '''set output for xpath'''
+    xml_content     = convert_to_xpath31(obj)
+    xmlns           = 'xmlns="' + XPATH_FUNCTIONS_NS + '"'
+    if                xml_content.startswith('<array>'):
+        part2       = xml_content.replace(   '<array>',
+                                             '<array ' + xmlns + '>', 1)
+    elif              xml_content.startswith('<map>'):
+        part2       = xml_content.replace(   '<map>',
+                                             '<map '   + xmlns + '>', 1)
+    else:
+        part2       =                        '<map '   + xmlns + '>'   \
+                                                       + xml_content   \
+                                           + '</map>'
+    return prolog + part2
+
+
+def set_namespace_str(xml_namespaces)                               -> str:
+    '''set namespace string from xml_namespaces'''
+    namespace_str                = ''
+    if                xml_namespaces is None:
+                      xml_namespaces = {}
+    for     prefix in xml_namespaces:
+        if  prefix ==  'xmlns':
+                    namespace_str                   += ' ' + 'xmlns'                           + '="' + xml_namespaces[prefix]             + '"'
+        elif prefix == 'xsi':
+            for     schema_att in xml_namespaces[prefix]:
+                if  schema_att ==              'schemaInstance':
+                    namespace_str                   += ' ' + 'xmlns' + ':'  + 'xsi'            + '="' + xml_namespaces[prefix][schema_att] + '"'
+                elif schema_att in [           'schemaLocation',
+                                    'noNamespaceSchemaLocation', ]:
+                    namespace_str                   += ' ' + 'xsi'   + ':'  +  schema_att      + '="' + xml_namespaces[prefix][schema_att] + '"'
+        else:
+                    namespace_str                   += ' ' + 'xmlns' + ':'  +  prefix          + '="' + xml_namespaces[prefix]             + '"'
+    return          namespace_str
+
+
 def dicttoxml(
     obj:            ELEMENT,
     xpath_format:   bool                    = False,                # default is False
@@ -908,48 +945,20 @@ def dicttoxml(
 )                                                                   -> bytes:
     '''docstring: see top of file'''
     if  xpath_format:
-        xml_content     = convert_to_xpath31(obj)
-        xmlns           = 'xmlns="' + XPATH_FUNCTIONS_NS + '"'
-        if  xml_content.startswith(           '<array>'):
-            part2       = xml_content.replace('<array>',
-                                              '<array ' + xmlns + '>', 1)
-        elif xml_content.startswith(          '<map>'):
-            part2       = xml_content.replace('<map>',
-                                              '<map '   + xmlns + '>', 1)
-        else:
-            part2       =                     '<map '   + xmlns + '>'   \
-                                                        + xml_content   \
-                                            + '</map>'
-        output          = prolog + part2
-    else:                           # not xpath_format
+        output          = set_xpath(obj)
+    else:
         output          = ''
         namespace_str   = set_namespace_str(xml_namespaces)
-        if not use_root:            # TODO instead of this, integrate it into fct as default value:
-            custom_root = 'content'     # custom root is needed in every case
-                                        # to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
-        output_elem = convert(
+        if  use_root is False:                    # TODO instead of this, integrate it into fct as default value:
+            if  config['only_read_folder']:
+                custom_root = only_read_folder
+            else:
+                custom_root = 'content'     # custom root is needed in every case
+                                            # to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
+        output_elem     = convert(
             obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
-        output      = prolog                                            \
-                    + '<'   + custom_root + ' ' + namespace_str + '>'   \
-                    + output_elem                                       \
-                    + '</'  + custom_root                       + '>'
+        output          = prolog                                            \
+                        + '<'   + custom_root + ' ' + namespace_str + '>'   \
+                        + output_elem                                       \
+                        + '</'  + custom_root                       + '>'
     return "".join(output).encode("utf-8")
-
-def set_namespace_str(xml_namespaces)                               -> str:
-    '''set namespace string from xml_namespaces'''
-    namespace_str                = ''
-    if                xml_namespaces is None:
-                      xml_namespaces = {}
-    for     prefix in xml_namespaces:
-        if  prefix ==  'xmlns':
-                    namespace_str                   += ' ' + 'xmlns'                           + '="' + xml_namespaces[prefix]             + '"'
-        elif prefix == 'xsi':
-            for     schema_att in xml_namespaces[prefix]:
-                if   schema_att == 'schemaInstance':
-                    namespace_str                   += ' ' + 'xmlns' + ':'  + 'xsi'            + '="' + xml_namespaces[prefix][schema_att] + '"'
-                elif schema_att in [           'schemaLocation',
-                                    'noNamespaceSchemaLocation', ]:
-                    namespace_str                   += ' ' + 'xsi'   + ':'  +  schema_att      + '="' + xml_namespaces[prefix][schema_att] + '"'
-        else:
-                    namespace_str                   += ' ' + 'xmlns' + ':'  +  prefix          + '="' + xml_namespaces[prefix]             + '"'
-    return          namespace_str
