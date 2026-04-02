@@ -956,8 +956,8 @@ def dicttoxml(
             if  only_read_folder != '':
                 custom_root = only_read_folder
             else:       # if  only_read_folder == ''
-                custom_root = 'content'     # custom root is needed in every case
-                                            # to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
+                custom_root = 'root'    # custom root is needed in every case
+                                        # to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
         output_elem     = convert(
             obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
         output          = prolog                                            \
