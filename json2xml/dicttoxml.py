@@ -384,6 +384,17 @@ def wrap_cdata(s: str | int | float | numbers.Number)               -> str:
 
 # ##############################################
 
+def open_tag( tag_name: str, attrs: str = '')                       -> str:
+    '''docstring'''
+    return_value: str = '<' + tag_name + distance(attrs) + attrs + '>'
+    # if  content == '':
+    #     return_value = '<' + tag_name + distance(attrs) + attrs + '/>'
+    return return_value
+
+def close_tag(tag_name: str)                                        -> str:
+    '''docstring'''
+    return              '</' + tag_name                          + '>'
+
 # XPath 3.1 json-to-xml conversion
 def get_xpath31_tag_name(val: Any)                                  -> str:
     """
@@ -450,14 +461,14 @@ def convert_to_xpath31(  obj: Any, parent_key: str | None = None)   -> str:
                 ]
     for [tag, content] in tag_to_content:
         if  tag_name    ==        tag:
-            return_value = '<'  + tag      + ' ' + key_attr + '>'   \
-                                + content                           \
-                         + '</' + tag                       + '>'
+            return_value =  open_tag( tag,       key_attr)          \
+                         +                  content                 \
+                         +  close_tag(tag)
             break
     if  return_value    == '':
-        return_value     = '<'  + 'string' + ' ' + key_attr + '>'   \
-                                +  escape_xml(str(obj))             \
-                         + '</' + 'string'                  + '>'
+        return_value     =  open_tag( 'string',  key_attr)          \
+                         +                  escape_xml(str(obj))    \
+                         +  close_tag('string')
     return return_value
 
 # ##############################################
@@ -892,18 +903,17 @@ def set_xpath(obj)                                                  -> str:
     '''set output for xpath'''
     xml_content     = convert_to_xpath31(obj)
     xmlns           = 'xmlns="' + XPATH_FUNCTIONS_NS + '"'
-    if                xml_content.startswith('<array>'):
-        part2       = xml_content.replace(   '<array>',
-                                             '<array ' + xmlns + '>', 1)
-    elif              xml_content.startswith('<map>'):
-        part2       = xml_content.replace(   '<map>',
-                                             '<map '   + xmlns + '>', 1)
+    if                xml_content.startswith(         '<array>'):
+        part2       = xml_content.replace(            '<array>',
+                                             open_tag( 'array', xmlns), 1)
+    elif              xml_content.startswith(         '<map>'):
+        part2       = xml_content.replace(            '<map>',
+                                             open_tag( 'map',   xmlns), 1)
     else:
-        part2       =                        '<map '   + xmlns + '>'   \
-                                                       + xml_content   \
-                                           + '</map>'
+        part2       =                        open_tag( 'map',   xmlns)  \
+                                           +                xml_content \
+                                           + close_tag('map',)
     return prolog + part2
-
 
 def set_namespace_str(xml_namespaces)                               -> str:
     '''set namespace string from xml_namespaces'''
@@ -923,7 +933,6 @@ def set_namespace_str(xml_namespaces)                               -> str:
         else:
                     namespace_str                   += ' ' + 'xmlns' + ':'  +  prefix          + '="' + xml_namespaces[prefix]             + '"'
     return          namespace_str
-
 
 def dicttoxml(
     obj:            ELEMENT,
@@ -960,8 +969,8 @@ def dicttoxml(
                                         # to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
         output_elem     = convert(
             obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
-        output          = prolog                                            \
-                        + '<'   + custom_root + ' ' + namespace_str + '>'   \
-                        + output_elem                                       \
-                        + '</'  + custom_root                       + '>'
+        output          = prolog                                \
+                        + open_tag( custom_root, namespace_str) \
+                        + output_elem                           \
+                        + close_tag(custom_root)
     return "".join(output).encode("utf-8")
