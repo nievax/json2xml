@@ -223,12 +223,12 @@ def get_unique_id(element: str)                                         -> str:
     Returns:
         str: the unique ID
     """
-    ids: list[str]  = []
+    ids: list[str]      = []
     while True:
         this_id:  str   = make_id(element)
         if  this_id not in ids:
             ids.append(this_id)
-            return ids[-1]                  # last in the list
+            return     this_id
 
 # ##############################################
 
@@ -299,6 +299,7 @@ def escape_xml(s: str | int | float | numbers.Number)               -> str:
         s = s.replace(">", "&gt;")
     return str(s)
 
+# TODO refactoring
 def make_attrstring(attr: dict[str, Any])                           -> str:
     """
     Create a string of XML attributes from a dictionary
@@ -309,7 +310,6 @@ def make_attrstring(attr: dict[str, Any])                           -> str:
     Returns:
         str:                   the string     of XML attributes
     """
-    # TODO refactoring
     return " ".join([f'{k}="{escape_xml(v)}"' for k, v in attr.items()])
 
 def distance(attributes: str)                                       -> str:
@@ -320,7 +320,7 @@ def distance(attributes: str)                                       -> str:
             attr_distance = ' '
     return  attr_distance
 
-def key_is_valid_xml(key: str)                                      -> bool:
+def key_is_valid_xml(   key: str)                                   -> bool:
     """
     Check if a key is a valid XML name.
 
@@ -338,7 +338,7 @@ def key_is_valid_xml(key: str)                                      -> bool:
     except Exception:  # minidom does not implement exceptions well
         return False
 
-# TODO
+# TODO return / break logic
 def make_valid_xml_name(key: str, attr: dict[str, Any])             -> tuple[str, dict[str, Any]]:
     """Tests an XML name and fixes it if invalid"""
 
@@ -476,12 +476,13 @@ def convert_to_xpath31(  obj: Any, parent_key: str | None = None)   -> str:
 
 # ##############################################
 
-def is_primitive_type(val: Any)                                     -> bool:
+def is_primitive_type(   val: Any)                                  -> bool:
     '''docstring'''
     xml_type        = get_xml_type(val)
     primitive_types = {"str", "int", "float", "bool", "number", "null"}
     return xml_type in primitive_types
 
+# TODO understand
 def dict2xml_str(
     item:                   dict[str, Any],
     item_name:              str,
@@ -578,6 +579,7 @@ def list2xml_str(
 
 # ##############################################
 
+# TODO understand
 def convert(
     obj:                    ELEMENT,
     ids:                    Any,
