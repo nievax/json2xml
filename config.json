@@ -1,5 +1,5 @@
-{   "pretty"                    : true,
-    "path_to_transform"         : "./examples/df_Datenformat",
+{   "path_to_transform"         : "./examples/df_Datenformat",
+    "pretty"                    : true,
     "xpath_format"              : false,
 
     "use_root"                  : false,
@@ -8,15 +8,15 @@
     "only_read_folder"          : "",
      "not_read_folder"          : "@context",
 
-    "wrap_array_items"          : true,
+    "wrap_array_items"          :  true,
     "custom_array_item_wrap"    : "node",
 
     "attr_type"                 : false,
     "cdata"                     : false,
-    "ids"                       : null,
+    "array_headers"             : false,
+    "ids"                       : [],
     "xml_namespaces"            : {"xsi":{"schemaInstance":            "http://www.w3.org/2001/XMLSchema-instance",
                                           "noNamespaceSchemaLocation": "controlledvocabulary.xsd"
                                             }
-                                },
-    "array_headers"             : false
+                                }
 }

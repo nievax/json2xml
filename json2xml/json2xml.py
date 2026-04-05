@@ -24,8 +24,8 @@ class Json2xml:
         # self.array_items_wrap       = array_items_wrap,               # fct           default is default_item_func / "item";                              TODO make this work
         self.custom_array_item_wrap = config["custom_array_item_wrap"]  # see above
         self.cdata                  = config["cdata"]                   # bool          default is False; wrap string values into CDATA sections
-        self.ids                    = config["ids"]                     # list | None   default is None / [];  elements get unique ids
-        self.xml_namespaces         = config["xml_namespaces"]          # dict | None   default is None / {}
+        self.ids                    = config["ids"]                     # list[str]     default is [];  elements get unique ids; or list[int]?
+        self.xml_namespaces         = config["xml_namespaces"]          # dict[str, Any] default is {}
         self.array_headers          = config["array_headers"]           # bool          default is False; repeat the outer header for each array element;   TODO use for DS?
         self.pretty                 = config["pretty"]                  # bool          default is True;  new lines + indenting; False gives no string, but bytes
         self.only_read_folder       = config["only_read_folder"]        # str           default is ""

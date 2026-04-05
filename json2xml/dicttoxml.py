@@ -77,7 +77,7 @@
 
     :param bool ids:
         elements get unique ids
-        default is False
+        default is []
 
     :param bool attr_type:
         elements get a data type attribute
@@ -100,8 +100,8 @@
 
         .. xml
 
-            <root xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                  xmlns:flex="http://www.w3.org/flex/flexBase">
+            <root xmlns:flex="http://www.w3.org/flex/flexBase"
+                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
     :param bool xpath_format:
         default is False
@@ -500,7 +500,6 @@ def dict2xml_str(
     """parse dict2xml"""
 
     ids: list[str]        = []         # initialize list of unique ids
-    ", ".join(str(key) for key in item)         # ??
     if  attr_type:
         attr["type"]      = get_xml_type(item)
     val_attr: dict[str, str] = item.pop("@attrs", attr)  # update attr with custom @attr if exists
@@ -582,7 +581,7 @@ def list2xml_str(
 # TODO understand
 def convert(
     obj:                    ELEMENT,
-    ids:                    Any,
+    ids:                    Any,        # default is list[str]
     attr_type:              bool,
     # array_items_wrap:       Callable[[str], str],
     cdata:                  bool,
@@ -641,9 +640,9 @@ def convert_dict(
 
     output: list[str] = []
     attr:   dict[str, str]
-    addline           = output.append
+    addline           = output.append       # ??
     for key, val in obj.items():
-        if  ids:
+        if   ids:
              attr     = {"id": get_unique_id(parent)}
         else:
              attr     = {}
@@ -726,7 +725,7 @@ def convert_dict(
 
 def convert_list(
     items:                  Sequence[Any],
-    ids:                    list[str] | None,
+    ids:                    list[str],
     attr_type:              bool,
     cdata:                  bool,
     parent:                 str,
@@ -737,22 +736,18 @@ def convert_list(
 ) -> str:
     """Converts a list into an XML string"""
 
-    output: list[str] = []
+    output: list[str]   = []
     attr:   dict[str, str]
-    addline           = output.append
+    addline             = output.append     ## ??
     # orig. was: item_name = array_items_wrap(parent)
-    item_name         = custom_array_item_wrap  # Is item_name still relevant if wrap_array_items is false
+    item_name           = custom_array_item_wrap  # Is item_name still relevant if wrap_array_items is false
     if  item_name.endswith("@flat"):
-        item_name     = item_name[:-5]          # remove "@flat"
-    if  ids:
-        this_id       = get_unique_id(parent)
-    else:
-        this_id       = None
+        item_name       = item_name[:-5]          # remove "@flat"
     for i, item in enumerate(items):
         if  ids:
-            attr = {'id': str(this_id) + '_' + str(i + 1)}
+            attr        = {'id': str(get_unique_id(parent)) + '_' + str(i + 1)}
         else:
-            attr = {}
+            attr        = {}
         if item is None:
                 addline(
                     convert_none(
@@ -911,11 +906,9 @@ def set_xpath(obj)                                                  -> str:
         part2       =                        make_tag( 'map',   xmlns, xml_content)
     return prolog + part2
 
-def set_namespace_str(xml_namespaces)                               -> str:
+def set_namespace_str(xml_namespaces: dict[str, Any])               -> str:
     '''set namespace string from xml_namespaces'''
-    namespace_str                = ''
-    if                xml_namespaces is None:
-                      xml_namespaces = {}
+    namespace_str                                    = ''
     for     prefix in xml_namespaces:
         if  prefix ==  'xmlns':
                     namespace_str                   += ' ' + 'xmlns'                           + '="' + xml_namespaces[prefix]             + '"'
@@ -947,8 +940,8 @@ def dicttoxml(
     array_headers:  bool                    = False,                # default is False; wrap each array item into the outer header (see also wrap_array_items)
     attr_type:      bool                    = True,                 # default is True;  display data type
     cdata:          bool                    = False,                # default is False; wrap string values into CDATA sections
-    ids:            list[int]      | None   = None,                 # default is None / [];  elements get unique ids
-    xml_namespaces: dict[str, Any] | None   = None,                 # default is None / {}
+    ids:            list[int]               = [],                   # default is [];  elements get unique ids; default is list[str]
+    xml_namespaces: dict[str, Any]          = {},                   # default is {}
     prolog:         str                     = PROLOG
 )                                                                   -> bytes:
     '''docstring: see top of file'''

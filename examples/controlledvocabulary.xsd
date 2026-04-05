@@ -58,7 +58,7 @@ Ana Alice Baptista <analice@dsi.uminho.pt>.
 					</xs:complexType>
 				</xs:element>
 			</xs:all>
-            <!-- modified: in orig. xsd, it says type="xs:ID", meaning ids must not be number strings, but CVs need exactly that -->
+            <!-- modified: in orig. xsd, it says type="xs:ID", meaning ids must NOT be number strings, but CVs need exactly that -->
 			<xs:attribute name="id"             type="xs:string"    use="required"/>
 			<xs:attribute name="label"          type="xs:string"    use="required"/>
 			<xs:attribute name="selectable"     type="xs:boolean"   default="true"/>
