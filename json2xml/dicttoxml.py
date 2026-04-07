@@ -77,7 +77,7 @@
 
     :param bool ids:
         elements get unique ids
-        default is False
+        default is []
 
     :param bool attr_type:
         elements get a data type attribute
@@ -100,8 +100,8 @@
 
         .. xml
 
-            <root xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                  xmlns:flex="http://www.w3.org/flex/flexBase">
+            <root xmlns:flex="http://www.w3.org/flex/flexBase"
+                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
     :param bool xpath_format:
         default is False
@@ -223,12 +223,12 @@ def get_unique_id(element: str)                                         -> str:
     Returns:
         str: the unique ID
     """
-    ids: list[str]  = []
+    ids: list[str]      = []
     while True:
         this_id:  str   = make_id(element)
         if  this_id not in ids:
             ids.append(this_id)
-            return ids[-1]                  # last in the list
+            return     this_id
 
 # ##############################################
 
@@ -299,6 +299,7 @@ def escape_xml(s: str | int | float | numbers.Number)               -> str:
         s = s.replace(">", "&gt;")
     return str(s)
 
+# TODO refactoring
 def make_attrstring(attr: dict[str, Any])                           -> str:
     """
     Create a string of XML attributes from a dictionary
@@ -309,7 +310,6 @@ def make_attrstring(attr: dict[str, Any])                           -> str:
     Returns:
         str:                   the string     of XML attributes
     """
-    # TODO refactoring
     return " ".join([f'{k}="{escape_xml(v)}"' for k, v in attr.items()])
 
 def distance(attributes: str)                                       -> str:
@@ -320,7 +320,7 @@ def distance(attributes: str)                                       -> str:
             attr_distance = ' '
     return  attr_distance
 
-def key_is_valid_xml(key: str)                                      -> bool:
+def key_is_valid_xml(   key: str)                                   -> bool:
     """
     Check if a key is a valid XML name.
 
@@ -331,16 +331,14 @@ def key_is_valid_xml(key: str)                                      -> bool:
         bool: True if the key is a valid XML name, False otherwise
     """
 
-    test_xml =  PROLOG              \
-                +  '<' + key + '>'  \
-                +    'foo'          \
-                + '</' + key + '>'
+    test_xml =  PROLOG + make_tag(key, '', 'foo')
     try:
         parseString(test_xml)
         return True
     except Exception:  # minidom does not implement exceptions well
         return False
 
+# TODO return / break logic
 def make_valid_xml_name(key: str, attr: dict[str, Any])             -> tuple[str, dict[str, Any]]:
     """Tests an XML name and fixes it if invalid"""
 
@@ -351,22 +349,22 @@ def make_valid_xml_name(key: str, attr: dict[str, Any])             -> tuple[str
     # attr = escape_xml(attr)
 
     if  key_is_valid_xml(key):
-        return key, attr
+        return           key, attr
 
-    if  isinstance(  key, int) or key.isdigit():
-        return 'n' + key, attr          # prepend a lowercase n(?)
+    if  isinstance(      key, int) or key.isdigit():
+        return 'n'     + key, attr          # prepend a lowercase n(?)
 
     if  key_is_valid_xml(key.replace(" ", "_")):
         return           key.replace(" ", "_"), attr
 
     # allow namespace prefixes + ignore @flat in key:
     if  key_is_valid_xml(key.replace(":", "").replace("@flat", "")):
-        return key, attr
+        return           key, attr
 
     # key is still invalid - move it into a name attribute:
-    attr["name"] =  key
     key          = "key"
-    return key, attr
+    attr["name"] =  key
+    return          key, attr
 
 # ##############################################
 
@@ -381,6 +379,26 @@ def wrap_cdata(s: str | int | float | numbers.Number)               -> str:
 # def default_item_func(parent: str, text: str = "item")            -> str:
 #     '''how to wrap array items'''
 #     return text
+
+# ##############################################
+
+def open_tag( tag_name: str, attrs: str = '')                       -> str:
+    '''docstring'''
+    return                    '<'     + tag_name + distance(attrs) + attrs + '>'
+
+def close_tag(tag_name: str)                                        -> str:
+    '''docstring'''
+    return                    '</'    + tag_name                           + '>'
+
+def make_tag( tag_name: str, attrs: str = '', content: str = '')    -> str:
+    '''docstring'''
+    if  content != '':
+        return_value: str   = open_tag( tag_name, attrs)    \
+                            +               content         \
+                            + close_tag(tag_name)
+    else:   # content == ''
+        return_value        = '<'     + tag_name + distance(attrs) + attrs + '/>'
+    return return_value
 
 # ##############################################
 
@@ -441,33 +459,30 @@ def convert_to_xpath31(  obj: Any, parent_key: str | None = None)   -> str:
     #     return_value    =    '<null'       + ' ' + key_attr + '/>'
 
     #                 tags                    contents
-    tag_to_conent = [   [ 'null',                   '',                                         ],
+    tag_to_content = [  [ 'null',                   '',                                         ],
                         [ 'boolean',            str(obj).lower(),                               ],
                         [ 'number',                 obj,                                        ],
                         [ 'string',  escape_xml(str(obj)),                                      ],
                         [ 'map',     ''.join(convert_to_xpath31(v, k) for k, v in obj.items()), ],  # children
                         [ "array",   ''.join(convert_to_xpath31(item) for item in obj),         ],  # children
                 ]
-    for [tag, content] in tag_to_conent:
-        if  tag_name    ==        tag:
-            return_value = '<'  + tag      + ' ' + key_attr + '>'   \
-                                + content                           \
-                         + '</' + tag                       + '>'
+    for [tag, content]   in tag_to_content:
+        if  tag_name     ==            tag:
+            return_value  =  make_tag( tag,      key_attr, content)
             break
-    if  return_value    == '':
-        return_value     = '<'  + 'string' + ' ' + key_attr + '>'   \
-                                +  escape_xml(str(obj))             \
-                         + '</' + 'string'                  + '>'
+    if      return_value == '':
+            return_value  =  make_tag( 'string', key_attr, escape_xml(str(obj)) )
     return return_value
 
 # ##############################################
 
-def is_primitive_type(val: Any)                                     -> bool:
+def is_primitive_type(   val: Any)                                  -> bool:
     '''docstring'''
     xml_type        = get_xml_type(val)
     primitive_types = {"str", "int", "float", "bool", "number", "null"}
     return xml_type in primitive_types
 
+# TODO understand
 def dict2xml_str(
     item:                   dict[str, Any],
     item_name:              str,
@@ -484,37 +499,36 @@ def dict2xml_str(
 
     """parse dict2xml"""
 
-    ids: list[str]    = []         # initialize list of unique ids
-    ", ".join(str(key) for key in item)         # ??
+    ids: list[str]        = []         # initialize list of unique ids
     if  attr_type:
-        attr["type"]  = get_xml_type(item)
+        attr["type"]      = get_xml_type(item)
     val_attr: dict[str, str] = item.pop("@attrs", attr)  # update attr with custom @attr if exists
-    subtree           = ""         # initialize subtree with default empty string
+    subtree               = ""         # initialize subtree with default empty string
     if "@val"  in item:
-        rawitem       = item["@val"]
+        rawitem           = item["@val"]
     else:
-        rawitem       = item
+        rawitem           = item
     if  is_primitive_type( rawitem):
         if   isinstance(   rawitem, dict):
-             subtree  = escape_xml(str(rawitem))
+             subtree      = escape_xml( str(rawitem))
         elif isinstance(   rawitem, str):
-             subtree  = escape_xml(    rawitem)
+             subtree      = escape_xml(     rawitem)
     else:
         # we can not use convert_dict, because rawitem could be non-dict
-             subtree  = convert(
-                        rawitem, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, item_name, array_headers=array_headers
-                        )
+             subtree      = convert(
+                            rawitem, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, item_name, array_headers=array_headers
+                            )
     if parent_is_list and array_headers:
-        if len(val_attr) > 0 and not wrap_array_items:
-            attrstring   = make_attrstring(val_attr)
-            return_value  = '<' + parent    + distance(attrstring) + attrstring + '>' + subtree + '</' + parent    + '>'
+        if len(val_attr)  > 0 and not wrap_array_items:
+            attrstring    = make_attrstring(val_attr)
+            return_value  = make_tag( parent,    attrstring, subtree)
         else:
-            return_value  = '<' + parent + '>'                                        + subtree + '</' + parent    + '>'
+            return_value  = make_tag( parent,    '',         subtree)
     elif item.get("@flat", False) or (parent_is_list and not wrap_array_items):
-            return_value  =                                                             subtree
+            return_value  =                                  subtree
     else:
-            attrstring   = make_attrstring(val_attr)
-            return_value  = '<' + item_name + distance(attrstring) + attrstring + '>' + subtree + '</' + item_name + '>'
+            attrstring    = make_attrstring(val_attr)
+            return_value  = make_tag( item_name, attrstring, subtree)
     return  return_value
 
 def list2xml_str(
@@ -558,17 +572,16 @@ def list2xml_str(
     or (len(item) > 0 and is_primitive_type(item[0]) and not wrap_array_items):
         return_value = subtree
     else:
-        attrstring  = make_attrstring(attr)
-        return_value = '<'  + item_name + distance(attrstring) + attrstring  + '>'   \
-                           + subtree                                                \
-                    + '</' + item_name                                      + '>'
+        attrstring   = make_attrstring(attr)
+        return_value = make_tag(item_name, attrstring, subtree)
     return return_value
 
 # ##############################################
 
+# TODO understand
 def convert(
     obj:                    ELEMENT,
-    ids:                    Any,
+    ids:                    Any,        # default is list[str]
     attr_type:              bool,
     # array_items_wrap:       Callable[[str], str],
     cdata:                  bool,
@@ -627,9 +640,9 @@ def convert_dict(
 
     output: list[str] = []
     attr:   dict[str, str]
-    addline           = output.append
+    addline           = output.append       # ??
     for key, val in obj.items():
-        if  ids:
+        if   ids:
              attr     = {"id": get_unique_id(parent)}
         else:
              attr     = {}
@@ -712,7 +725,7 @@ def convert_dict(
 
 def convert_list(
     items:                  Sequence[Any],
-    ids:                    list[str] | None,
+    ids:                    list[str],
     attr_type:              bool,
     cdata:                  bool,
     parent:                 str,
@@ -723,22 +736,18 @@ def convert_list(
 ) -> str:
     """Converts a list into an XML string"""
 
-    output: list[str] = []
+    output: list[str]   = []
     attr:   dict[str, str]
-    addline           = output.append
+    addline             = output.append     ## ??
     # orig. was: item_name = array_items_wrap(parent)
-    item_name         = custom_array_item_wrap  # Is item_name still relevant if wrap_array_items is false
+    item_name           = custom_array_item_wrap  # Is item_name still relevant if wrap_array_items is false
     if  item_name.endswith("@flat"):
-        item_name     = item_name[:-5]          # remove "@flat"
-    if  ids:
-        this_id       = get_unique_id(parent)
-    else:
-        this_id       = None
+        item_name       = item_name[:-5]          # remove "@flat"
     for i, item in enumerate(items):
         if  ids:
-            attr = {'id': str(this_id) + '_' + str(i + 1)}
+            attr        = {'id': str(get_unique_id(parent)) + '_' + str(i + 1)}
         else:
-            attr = {}
+            attr        = {}
         if item is None:
                 addline(
                     convert_none(
@@ -846,9 +855,7 @@ def convert_number(
         formatted_val   = wrap_cdata(val)
     else:
         formatted_val   = escape_xml(val)
-    return '<'  + key + distance(attrstring) + attrstring + '>'   \
-                + formatted_val                                   \
-        +  '</' + key                                     + '>'
+    return make_tag(key, attrstring, formatted_val)
 
 def convert_bool(
     key:        str,
@@ -859,15 +866,13 @@ def convert_bool(
 ) -> str:
     """Converts a boolean into an XML element"""
 
-    if  attr is None:
-        attr = {}
-    key, attr = make_valid_xml_name(key, attr)
+    if  attr        is None:
+        attr         = {}
+    key, attr        = make_valid_xml_name(key, attr)
     if  attr_type:
         attr["type"] = get_xml_type(val)      # "bool"
     attrstring       = make_attrstring(attr)
-    return '<'  + key + distance(attrstring) + attrstring + '>'   \
-                + str(val).lower()                                \
-         + '</' + key                                     + '>'
+    return make_tag(key,    attrstring, str(val).lower())
 
 def convert_none(
     key:        str,
@@ -877,16 +882,46 @@ def convert_none(
 )                                                                   -> str:
     """Converts a null value into an XML element"""
 
-    if  attr is None:
-        attr = {}
-    key, attr = make_valid_xml_name(key, attr)
+    if  attr         is None:
+        attr          = {}
+    key, attr         = make_valid_xml_name(key, attr)
     if  attr_type:
         attr["type"]  = get_xml_type(None)    # "null"
     attrstring        = make_attrstring(attr)
-    return '<'  + key + distance(attrstring) + attrstring + '>'   \
-         + '</' + key                                     + '>'
+    return make_tag(key,     attrstring)
 
 # ##############################################
+
+def set_xpath(obj)                                                  -> str:
+    '''set output for xpath'''
+    xml_content     = convert_to_xpath31(obj)
+    xmlns           = 'xmlns="' + XPATH_FUNCTIONS_NS + '"'
+    if                xml_content.startswith(         '<array>'):
+        part2       = xml_content.replace(            '<array>',
+                                             open_tag( 'array', xmlns), 1)
+    elif              xml_content.startswith(         '<map>'):
+        part2       = xml_content.replace(            '<map>',
+                                             open_tag( 'map',   xmlns), 1)
+    else:
+        part2       =                        make_tag( 'map',   xmlns, xml_content)
+    return prolog + part2
+
+def set_namespace_str(xml_namespaces: dict[str, Any])               -> str:
+    '''set namespace string from xml_namespaces'''
+    namespace_str                                    = ''
+    for     prefix in xml_namespaces:
+        if  prefix ==  'xmlns':
+                    namespace_str                   += ' ' + 'xmlns'                           + '="' + xml_namespaces[prefix]             + '"'
+        elif prefix == 'xsi':
+            for     schema_att in xml_namespaces[prefix]:
+                if  schema_att ==              'schemaInstance':
+                    namespace_str                   += ' ' + 'xmlns' + ':'  + 'xsi'            + '="' + xml_namespaces[prefix][schema_att] + '"'
+                elif schema_att in [           'schemaLocation',
+                                    'noNamespaceSchemaLocation', ]:
+                    namespace_str                   += ' ' + 'xsi'   + ':'  +  schema_att      + '="' + xml_namespaces[prefix][schema_att] + '"'
+        else:
+                    namespace_str                   += ' ' + 'xmlns' + ':'  +  prefix          + '="' + xml_namespaces[prefix]             + '"'
+    return          namespace_str
 
 def dicttoxml(
     obj:            ELEMENT,
@@ -896,60 +931,32 @@ def dicttoxml(
     custom_root:    str                     = "root",               # default is "root"
 
     wrap_array_items:   bool                = True,                 # default is True;  wrap each array item into a tag
-    # array_items_wrap:   Callable[[str], str]= default_item_func,    # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
+    # array_items_wrap:   Callable[[str], str]= default_item_func,  # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
     custom_array_item_wrap: str             = 'node',
+
+    only_read_folder:   str                 = "",
+    not_read_folder:    str                 = "",
 
     array_headers:  bool                    = False,                # default is False; wrap each array item into the outer header (see also wrap_array_items)
     attr_type:      bool                    = True,                 # default is True;  display data type
     cdata:          bool                    = False,                # default is False; wrap string values into CDATA sections
-    ids:            list[int]      | None   = None,                 # default is None / [];  elements get unique ids
-    xml_namespaces: dict[str, Any] | None   = None,                 # default is None / {}
+    ids:            list[int]               = [],                   # default is [];  elements get unique ids; default is list[str]
+    xml_namespaces: dict[str, Any]          = {},                   # default is {}
     prolog:         str                     = PROLOG
 )                                                                   -> bytes:
     '''docstring: see top of file'''
+    output                  = ''
     if  xpath_format:
-        xml_content     = convert_to_xpath31(obj)
-        xmlns           = 'xmlns="' + XPATH_FUNCTIONS_NS + '"'
-        if  xml_content.startswith(           '<array>'):
-            part2       = xml_content.replace('<array>',
-                                              '<array ' + xmlns + '>', 1)
-        elif xml_content.startswith(          '<map>'):
-            part2       = xml_content.replace('<map>',
-                                              '<map '   + xmlns + '>', 1)
-        else:
-            part2       =                     '<map '   + xmlns + '>'   \
-                                                        + xml_content   \
-                                            + '</map>'
-        output          = prolog + part2
-    else:                           # not xpath_format
-        output          = ''
-        namespace_str   = set_namespace_str(xml_namespaces)
-        if not use_root:            # TODO instead of this, integrate it into fct as default value:
-            custom_root = 'content'     # custom root is needed in every case
+        output              = set_xpath(obj)
+    else:
+        namespace_str       = set_namespace_str(xml_namespaces)
+        if  use_root is False:                    # TODO instead of this, integrate it into fct as default value:
+            if  only_read_folder != '':
+                custom_root = only_read_folder
+            else:       # if  only_read_folder == ''
+                custom_root = 'root'    # custom root is needed in every case
                                         # to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
-        output_elem = convert(
+        output_elem         = convert(
             obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
-        output      = prolog                                            \
-                    + '<'   + custom_root + ' ' + namespace_str + '>'   \
-                    + output_elem                                       \
-                    + '</'  + custom_root                       + '>'
+        output              = prolog + make_tag(custom_root, namespace_str, output_elem)
     return "".join(output).encode("utf-8")
-
-def set_namespace_str(xml_namespaces)                               -> str:
-    '''set namespace string from xml_namespaces'''
-    namespace_str                = ''
-    if                xml_namespaces is None:
-                      xml_namespaces = {}
-    for     prefix in xml_namespaces:
-        if  prefix ==  'xmlns':
-                    namespace_str                   += ' ' + 'xmlns'                           + '="' + xml_namespaces[prefix]             + '"'
-        elif prefix == 'xsi':
-            for     schema_att in xml_namespaces[prefix]:
-                if   schema_att == 'schemaInstance':
-                    namespace_str                   += ' ' + 'xmlns' + ':'  + 'xsi'            + '="' + xml_namespaces[prefix][schema_att] + '"'
-                elif schema_att in [           'schemaLocation',
-                                    'noNamespaceSchemaLocation', ]:
-                    namespace_str                   += ' ' + 'xsi'   + ':'  +  schema_att      + '="' + xml_namespaces[prefix][schema_att] + '"'
-        else:
-                    namespace_str                   += ' ' + 'xmlns' + ':'  +  prefix          + '="' + xml_namespaces[prefix]             + '"'
-    return          namespace_str
