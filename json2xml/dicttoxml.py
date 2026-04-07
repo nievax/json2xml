@@ -909,6 +909,8 @@ def set_xpath(obj)                                                  -> str:
 def set_namespace_str(xml_namespaces: dict[str, Any])               -> str:
     '''set namespace string from xml_namespaces'''
     namespace_str                                    = ''
+    if                xml_namespaces is None:
+                      xml_namespaces = {}
     for     prefix in xml_namespaces:
         if  prefix ==  'xmlns':
                     namespace_str                   += ' ' + 'xmlns'                           + '="' + xml_namespaces[prefix]             + '"'
@@ -959,4 +961,4 @@ def dicttoxml(
         output_elem         = convert(
             obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
         output              = prolog + make_tag(custom_root, namespace_str, output_elem)
-    return "".join(output).encode("utf-8")
+    return ''.join(output).encode('utf-8')
