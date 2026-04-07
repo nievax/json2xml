@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+       <node id="0" label="data-format" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="controlledvocabulary.xsd">
+       <isComposedBy>
+       <node id="1" label="Audiovisuell"/>
+       <node id="2" label="Datenkollektion">
+       <hasNote>
+=Sammlung
+       </hasNote>
+
+       </node>
+       <node id="3" label="DataPaper"/>
+       <node id="4" label="Datensatz">
+       <hasNote>
+Hierunter fallen auch Logdaten (Hinweis: Im Metadatenschema daIra 4.0 kann bei der Auswahl des Resource Type 'Datensatz' als Spezifizierung bei Resource Tpe Free 'Logdaten' eingetragen werden.).
+       </hasNote>
+
+       </node>
+       <node id="5" label="Event"/>
+       <node id="6" label="Bild"/>
+       <node id="7" label="Interaktives Objekt"/>
+       <node id="8" label="Modell"/>
+       <node id="9" label="Physisches Objekt"/>
+       <node id="10" label="Service"/>
+       <node id="11" label="Software"/>
+       <node id="12" label="Audio"/>
+       <node id="13" label="Text"/>
+       <node id="14" label="Workflow"/>
+       <node id="15" label="andere"/>
+
+       </isComposedBy>
+
+       </node>
