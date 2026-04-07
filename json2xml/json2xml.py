@@ -20,12 +20,16 @@ class Json2xml:
         self.use_root               = config["use_root"]                # bool          default is True;  the output is wrapped into an XML root element
         self.custom_root            = config["custom_root"]             # str           default is "root"
         self.attr_type              = config["attr_type"]               # bool          default is True;  display data type
-        self.wrap_array_items       = config["wrap_array_items"]        # bool          default is True;  wrap each array item into a tag;                  TODO use for DS?
+        self.wrap_array_items       = config["wrap_array_items"]        # bool          default is True;  wrap each array item  into a tag;                 TODO use for DS?
         # self.array_items_wrap       = array_items_wrap,               # fct           default is default_item_func / "item";                              TODO make this work
         self.custom_array_item_wrap = config["custom_array_item_wrap"]  # see above
-        self.cdata                  = config["cdata"]                   # bool          default is False; wrap string values into CDATA sections
-        self.ids                    = config["ids"]                     # list[str]     default is [];  elements get unique ids; or list[int]?
+        self.cdata                  = config["cdata"]                   # bool          default is False; wrap string values    into CDATA sections
+        self.ids                    = config["ids"]                     # list[str]     default is  [];   elements get unique ids; or list[int]?
         self.xml_namespaces         = config["xml_namespaces"]          # dict[str, Any] default is {}
+                                                                        #                example is {"xsi":{"schemaInstance":            "http://www.w3.org/2001/XMLSchema-instance",
+                                                                        #                                   "noNamespaceSchemaLocation": "controlledvocabulary.xsd"
+                                                                        #                                   }
+                                                                        #                           }
         self.array_headers          = config["array_headers"]           # bool          default is False; repeat the outer header for each array element;   TODO use for DS?
         self.pretty                 = config["pretty"]                  # bool          default is True;  new lines + indenting; False gives no string, but bytes
         self.only_read_folder       = config["only_read_folder"]        # str           default is ""
