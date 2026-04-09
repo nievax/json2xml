@@ -10,7 +10,9 @@
 
 - eigene Features einbauen (vgl. sync.py: make_node usw.)
 
-- config: preferred set einbauen for CV terms / DSpace (aufteilen: input / output)
+- config:
+    - preferred set einbauen for CV terms / DSpace (aufteilen: input / output)
+    - evtl. jsonc oder json5 nutzen?
 
 - Doku updaten
 
