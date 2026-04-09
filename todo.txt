@@ -10,6 +10,8 @@
 
 - eigene Features einbauen (vgl. sync.py: make_node usw.)
 
+- CodeSmell.xls checken; gelbe Warnings; unterpunktete Funktionen; for/if: continue
+
 - config:
     - evtl. jsonc oder json5 nutzen?
 

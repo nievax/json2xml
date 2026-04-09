@@ -743,9 +743,9 @@ def convert_list(
     item_name           = custom_array_item_wrap  # Is item_name still relevant if wrap_array_items is false
     if  item_name.endswith("@flat"):
         item_name       = item_name[:-5]          # remove "@flat"
-    for i, item in enumerate(items):
+    for i, item in enumerate(items, start=1):
         if  ids:
-            attr        = {'id': str(get_unique_id(parent)) + '_' + str(i + 1)}
+            attr        = {'id': str(get_unique_id(parent)) + '_' + str(i)}
         else:
             attr        = {}
         if item is None:

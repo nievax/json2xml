@@ -151,8 +151,8 @@ def transform_to_xml(topterms: list, test_cv:dict)              -> str:
             label                   = escape_xml_chars(term)
         return make_node(NODE_STR_XML, {'id': id_number, LABEL_STR_XML: label}, cont)
 
-    for i, topterm in enumerate(topterms):
-        term_nodes                 += build_term_xml(topterm, test_cv["id"], i+1)   # enumerate starts with 0
+    for i, topterm in enumerate(topterms, start=1):
+        term_nodes                 += build_term_xml(topterm, test_cv["id"], i)
     xml_text                        =  line0 +  make_node(NODE_STR_XML,
                                                             root_attributes,
                                                             make_node(SUBTREE_STR_XML, None, term_nodes),
