@@ -5,7 +5,7 @@ from json2xml.utils import readfromjson
 def write_file(    path: str, cont)                      -> None:
     ''''write content to file in path'''
     with open(path, "w", encoding="utf-8") as file:             # includes file closing
-        file.write(cont)
+        file.write(str(cont))
 
 # options for config.json:
 # ==========================

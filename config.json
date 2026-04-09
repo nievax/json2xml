@@ -1,6 +1,6 @@
 {   "path_to_transform":    "./examples/df_Datenformat",
     "only_read_folder":     "",
-    "not_read_folder":      "@context",
+     "not_read_folder":     "@context",
     
     "active":               "dspace",
     "dspace":{  

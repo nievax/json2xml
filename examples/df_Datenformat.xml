@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<content xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="controlledvocabulary.xsd">
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="controlledvocabulary.xsd">
 	<id>https://w3id.org/iqb/v85/df/</id>
 	<type>ConceptScheme</type>
 	<title>
@@ -140,4 +140,4 @@ License: CC0 1.0 Universell (CC0 1.0) / Public Domain Dedication (https://creati
 			</prefLabel>
 		</node>
 	</hasTopConcept>
-</content>
+</root>

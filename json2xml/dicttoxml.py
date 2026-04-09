@@ -904,13 +904,11 @@ def set_xpath(obj)                                                  -> str:
                                              open_tag( 'map',   xmlns), 1)
     else:
         part2       =                        make_tag( 'map',   xmlns, xml_content)
-    return prolog + part2
+    return PROLOG   + part2
 
 def set_namespace_str(xml_namespaces: dict[str, Any])               -> str:
     '''set namespace string from xml_namespaces'''
     namespace_str                                    = ''
-    if                xml_namespaces is None:
-                      xml_namespaces = {}
     for     prefix in xml_namespaces:
         if  prefix ==  'xmlns':
                     namespace_str                   += ' ' + 'xmlns'                           + '="' + xml_namespaces[prefix]             + '"'
@@ -937,27 +935,30 @@ def dicttoxml(
     custom_array_item_wrap: str             = 'node',
 
     only_read_folder:   str                 = "",
-    not_read_folder:    str                 = "",
 
     array_headers:  bool                    = False,                # default is False; wrap each array item into the outer header (see also wrap_array_items)
     attr_type:      bool                    = True,                 # default is True;  display data type
     cdata:          bool                    = False,                # default is False; wrap string values into CDATA sections
-    ids:            list[int]               = [],                   # default is [];  elements get unique ids; default is list[str]
-    xml_namespaces: dict[str, Any]          = {},                   # default is {}
+    ids:            list[int]      | None   = None,                 # default is None;  elements get unique ids; default is list[str]
+    xml_namespaces: dict[str, Any] | None   = None,                 # default is None
     prolog:         str                     = PROLOG
 )                                                                   -> bytes:
     '''docstring: see top of file'''
     output                  = ''
+    if  xml_namespaces     is None:
+        xml_namespaces      = {}
+    if  ids                is None:
+        ids                 = []
     if  xpath_format:
         output              = set_xpath(obj)
     else:
         namespace_str       = set_namespace_str(xml_namespaces)
         if  use_root is False:                    # TODO instead of this, integrate it into fct as default value:
-            if  only_read_folder != '':
+            if  only_read_folder:       #      != ''
                 custom_root = only_read_folder
             else:       # if  only_read_folder == ''
-                custom_root = 'root'    # custom root is needed in every case
-                                        # to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
+                custom_root = 'root'    # custom root is needed in every case ...
+                                        # ... to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
         output_elem         = convert(
             obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
         output              = prolog + make_tag(custom_root, namespace_str, output_elem)
