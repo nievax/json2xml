@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<node xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="controlledvocabulary.xsd"
+                            id="0"      label="data-type-v2">
+    <isComposedBy>
+        <node               id="1"      label="Kompetenz- und Leistungsdaten"/>
+        <node               id="2"      label="Qualitatives, nicht oder gering standardisiertes Datenmaterial"/>
+        <node               id="3"      label="Umfrage- und Aggregatedaten"/>
+            <node           id="4"      label="Forschungsinstrument">
+                <isComposedBy>
+                    <node   id="41"     label="Fragebogenskalen"/>
+                    <node   id="42"     label="Kompetenztest oder Wissenstest"/>
+                    <node   id="43"     label="Ratingmanual"/>                  
+                    <node   id="44"     label="Lerntagebuch"/>                  
+                </isComposedBy>
+            </node>
+
+        <node               id="99"     label="Sonstiges Datenmaterial"/>
+    </isComposedBy>
+</node>

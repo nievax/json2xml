@@ -2,12 +2,9 @@
     - root / custom root (use_root false makes no sense in comb. with pretty / parse?!)
     - array item wrap x2
 
-- do not read section "context" from CV self.data (gives Error)!
-        content of this section as namespaces??
-
 - array_headers testen in Kombi mit wrap_array_items
 
-- hierarchische CVs kopieren nach examples
+- hierarchische CVs testen
 
 - Architektur verstehen: wie hängen fcts zus.? (vgl. Doku)
 
@@ -17,4 +14,4 @@
 
 - Doku updaten
 
-- nachziehen / anpassen: cli.py, _fast.py, ...#
+- nachziehen / anpassen: cli.py, _fast.py, ...
