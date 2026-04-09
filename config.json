@@ -1,22 +1,41 @@
-{   "path_to_transform"         : "./examples/df_Datenformat",
-    "pretty"                    : true,
-    "xpath_format"              : false,
+{   "path_to_transform":    "./examples/df_Datenformat",
+    "only_read_folder":     "",
+    "not_read_folder":      "@context",
+    
+    "active":               "dspace",
+    "dspace":{  
+                "pretty"                    : true,
+                "xpath_format"              : false,
 
-    "use_root"                  : false,
-    "custom_root"               : "isComposedBy",
+                "use_root"                  : false,
+                "custom_root"               : "isComposedBy",
 
-    "only_read_folder"          : "",
-     "not_read_folder"          : "@context",
+                "wrap_array_items"          : true,
+                "custom_array_item_wrap"    : "node",
 
-    "wrap_array_items"          :  true,
-    "custom_array_item_wrap"    : "node",
-
-    "attr_type"                 : false,
-    "cdata"                     : false,
-    "array_headers"             : false,
-    "ids"                       : [],
-    "xml_namespaces"            : {"xsi":{"schemaInstance":            "http://www.w3.org/2001/XMLSchema-instance",
-                                          "noNamespaceSchemaLocation": "controlledvocabulary.xsd"
+                "attr_type"                 : false,
+                "cdata"                     : false,
+                "array_headers"             : false,
+                "ids"                       : [],
+                "xml_namespaces"            : {"xsi":{"schemaInstance":            "http://www.w3.org/2001/XMLSchema-instance",
+                                                      "noNamespaceSchemaLocation": "controlledvocabulary.xsd"
+                                                        }
                                             }
-                                }
+    },
+    "custom": {
+                "pretty"                    : true,
+                "xpath_format"              : true,
+
+                "use_root"                  : true,
+                "custom_root"               : "root",
+
+                "wrap_array_items"          : true,
+                "custom_array_item_wrap"    : "alpen",
+
+                "attr_type"                 : true,
+                "cdata"                     : true,
+                "array_headers"             : true,
+                "ids"                       : [],
+                "xml_namespaces"            : {}
+    }
 }
