@@ -587,7 +587,7 @@ def convert(
     cdata:                  bool,
     wrap_array_items:       bool,
     custom_array_item_wrap: str,
-    parent:                 str     =   "root",
+    parent:                 str     =   "root",        # TODO or better use custom_root?
     array_headers:          bool    =    False,
 ) -> str:
     """Routes the elements of an object to the right function
@@ -930,7 +930,7 @@ def dicttoxml(
     xpath_format:   bool                    = False,                # default is False
 
     use_root:       bool                    = True,                 # default is True;  wrap the output into an XML root element
-    custom_root:    str                     = "root",               # default is "root"
+    custom_root:    str                     = "root",               # default is "root"; TODO or better use custom_root?
 
     wrap_array_items:   bool                = True,                 # default is True;  wrap each array item into a tag
     # array_items_wrap:   Callable[[str], str]= default_item_func,  # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
