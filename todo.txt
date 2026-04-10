@@ -6,10 +6,13 @@
 
 - eigene Features einbauen (vgl. sync.py: make_node usw.)
 
-- CodeSmell.xls checken; gelbe Warnings; unterpunktete Funktionen
+- CodeSmell.xls checken
 
-- config:
-    - evtl. jsonc oder json5 nutzen?
+- gelbe Warnings
+
+- unterpunktete Funktionen: weniger Parameter durch bessere Klassen?!
+
+- config: evtl. jsonc oder json5 nutzen?
 
 - Doku updaten
 
