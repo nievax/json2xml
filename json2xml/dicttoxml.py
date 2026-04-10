@@ -248,10 +248,10 @@ ELEMENT = Union[
     dict[str, Any],
 ]
 
-def make_bundle(attr_type:              bool                    = True,
-                cdata:                  bool                    = False,
-                custom_array_item_wrap: str                     = '',
-                array_headers:          bool                    = False,
+def make_bundle(attr_type:                   bool               = True,
+                cdata:                       bool               = False,
+                custom_array_item_wrap:      str                = '',
+                array_headers:               bool               = False,
                 attr:                   dict[str, Any] | None   = None,
                 )                                                   -> dict[str, str | bool]:
     '''docstring'''
@@ -510,12 +510,12 @@ def dict2xml_str(
     # # array_items_wrap: Callable[[str], str],
 )                                                                   -> str:
     """parse dict2xml"""
-    return_value:           str             = ''
-    attr_type:              bool            = bundle['attr_type']
+    return_value:                str        = ''
+    attr_type:                   bool       = bundle['attr_type']
     attr:                   dict[str, Any]  = bundle['attr']
-    cdata:                  bool            = bundle['cdata']
-    custom_array_item_wrap: str             = bundle['custom_array_item_wrap']
-    array_headers:          bool            = bundle['array_headers']
+    cdata:                       bool       = bundle['cdata']
+    custom_array_item_wrap:      str        = bundle['custom_array_item_wrap']
+    array_headers:               bool       = bundle['array_headers']
     ids:                    list[str]       = []
     if  attr_type:
         attr["type"]      = get_xml_type(item)
@@ -553,20 +553,20 @@ def dict2xml_str(
 def list2xml_str(
     bundle:                 dict[str, Any],
     item:                   Sequence[ Any],
-    item_name:              str,
+    item_name:                   str,
     # wrap_array_items:       bool,
     # array_items_wrap: Callable[[str], str],
 )                                                                   -> str:
     '''parse list2xml'''
-    return_value:           str             = ''
-    attr_type:              bool            = bundle['attr_type']
-    cdata:                  bool            = bundle['cdata']
-    custom_array_item_wrap: str             = bundle['custom_array_item_wrap']
-    array_headers:          bool            = bundle['array_headers']
+    return_value:                str        = ''
+    attr_type:                   bool       = bundle['attr_type']
     attr:                   dict[str, Any]  = bundle['attr']
+    cdata:                       bool       = bundle['cdata']
+    custom_array_item_wrap:      str        = bundle['custom_array_item_wrap']
+    array_headers:               bool       = bundle['array_headers']
     ids:                    list[str]       = []
-    flat:                   bool
-    subtree:                str
+    flat:                        bool
+    subtree:                     str
     if  attr_type:
         attr["type"] = get_xml_type(item)
     if  item_name.endswith("@flat"):
@@ -598,17 +598,17 @@ def list2xml_str(
 def convert(
     bundle:                 dict[str, Any],
     obj:                    ELEMENT,
-    ids:                    Any,        # default is list[str]
+    ids:                         Any,        # default is list[str]
     # array_items_wrap:       Callable[[str], str],
     # wrap_array_items:       bool,
-    parent:                 str     =   "root",        # TODO or better use custom_root?
+    parent:                      str        = "root",        # TODO or better use custom_root?
 ) -> str:
     """Routes the elements of an object to the right function
     to convert them based on their data type"""
-    attr_type:              bool            = bundle['attr_type']
-    cdata:                  bool            = bundle['cdata']
-    custom_array_item_wrap: str             = bundle['custom_array_item_wrap']
-    array_headers:          bool            = bundle['array_headers']
+    attr_type:                   bool       = bundle['attr_type']
+    cdata:                       bool       = bundle['cdata']
+    custom_array_item_wrap:      str        = bundle['custom_array_item_wrap']
+    array_headers:               bool       = bundle['array_headers']
 
     # item_name = array_items_wrap(parent)
     item_name = custom_array_item_wrap
@@ -618,50 +618,45 @@ def convert(
     # and hence we get wrong value for the xml type bool here;
     # we just change order and check for bool first,
     # because no other type than bool can be true for bool check
-    if   isinstance(obj, bool):
-        return   convert_bool(  key=item_name, val=obj,             attr_type=attr_type,          cdata=cdata, )
+    if  isinstance(obj, bool):
+        return   convert_bool(  item_name, obj,             attr_type,     cdata=cdata)
 
-    elif isinstance(obj, numbers.Number):
-        return   convert_number(key=item_name, val=obj,             attr_type=attr_type, attr={}, cdata=cdata, )
+    if  isinstance(obj, (numbers.Number,    str)):
+        return   convert_number(item_name, obj,             attr_type, {}, cdata)
 
-    elif isinstance(obj, str):
-        return   convert_number(key=item_name, val=obj,             attr_type=attr_type, attr={}, cdata=cdata, )
+    if  isinstance(obj, (datetime.datetime, datetime.date)) and hasattr(obj, "isoformat") :
+        return   convert_number(item_name, obj.isoformat(), attr_type, {}, cdata)
 
-    elif isinstance(obj, (datetime.datetime, datetime.date))  and hasattr(obj, "isoformat") :
-        return   convert_number(key=item_name, val=obj.isoformat(), attr_type=attr_type, attr={}, cdata=cdata, )
+    if  obj is          None:
+        return   convert_none(  item_name,                  attr_type,     cdata=cdata)
 
-    elif obj is          None:
-        return   convert_none(  key=item_name,                      attr_type=attr_type,          cdata=cdata)
-
-    elif isinstance(obj, dict):
+    if  isinstance(obj, dict):
         return   convert_dict(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
                               cast("dict[str, Any]", obj),
                               ids,
                               parent)
 
-    elif isinstance(obj, Sequence):
+    if  isinstance(obj, Sequence):
         return   convert_list(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
                               obj,
                               ids,
                               parent)
-
-    else:
-        raise TypeError('Unsupported data type: ' + str(obj) + ' (' + type(obj).__name__ + ')' )
+    raise TypeError('Unsupported data type: ' + str(obj) + ' (' + type(obj).__name__ + ')' )
 
 def convert_dict(
-    bundle:                     dict[str, Any],
-    obj:                        dict[str, Any],
-    ids:                        list[str],
-    parent:                     str,
+    bundle:                 dict[str, Any],
+    obj:                    dict[str, Any],
+    ids:                    list[str],
+    parent:                      str,
     # wrap_array_items:           bool,
     # array_items_wrap: Callable[[str], str],
 ) -> str:
     """Converts a dict into an XML string"""
     output:                 list[str]       = []                    # or str?
-    attr_type:              bool            = bundle['attr_type']
-    cdata:                  bool            = bundle['cdata']
-    custom_array_item_wrap: str             = bundle['custom_array_item_wrap']
-    array_headers:          bool            = bundle['array_headers']
+    attr_type:                   bool       = bundle['attr_type']
+    cdata:                       bool       = bundle['cdata']
+    custom_array_item_wrap:      str        = bundle['custom_array_item_wrap']
+    array_headers:               bool       = bundle['array_headers']
     attr:                   dict[str, str]
     for key, val in obj.items():
         if   ids:
@@ -745,10 +740,10 @@ def convert_list(
 ) -> str:
     """Converts a list into an XML string"""
     output:                 list[str]       = []                    # or str?
-    attr_type:              bool            = bundle['attr_type']
-    cdata:                  bool            = bundle['cdata']
-    custom_array_item_wrap: str             = bundle['custom_array_item_wrap']
-    array_headers:          bool            = bundle['array_headers']
+    attr_type:                   bool       = bundle['attr_type']
+    cdata:                       bool       = bundle['cdata']
+    custom_array_item_wrap:      str        = bundle['custom_array_item_wrap']
+    array_headers:               bool       = bundle['array_headers']
     attr:                   dict[str, str]
     # TODO orig. was: item_name = array_items_wrap(parent)
     item_name           = custom_array_item_wrap  # Is item_name still relevant if wrap_array_items is false
@@ -838,11 +833,11 @@ def convert_list(
 
 # TODO make a general fct out of these ("convert a value into an XML element"):
 def convert_number(
-    key:        str,
+    key:             str,
     val:        int | float | numbers.Number | datetime.datetime | datetime.date | str,
-    attr_type:  bool,
+    attr_type:       bool,
     attr:       dict[str, Any] | None = None,
-    cdata:      bool                  = False,
+    cdata:           bool             = False,
 ) -> str:
     """Converts a number, datetime, or string into an XML element"""
     if  attr is None:
@@ -860,11 +855,11 @@ def convert_number(
     return make_tag(key, attrstring, formatted_val)
 
 def convert_bool(
-    key:        str,
-    val:        bool,
-    attr_type:  bool,
+    key:             str,
+    val:             bool,
+    attr_type:       bool,
     attr:       dict[str, Any] | None   = None,
-    cdata:      bool                    = False               # is used in fct calls
+    cdata:           bool               = False               # is used in fct calls
 ) -> str:
     """Converts a boolean into an XML element"""
     if  attr        is None:
@@ -876,10 +871,10 @@ def convert_bool(
     return make_tag(key,    attrstring, str(val).lower())
 
 def convert_none(
-    key:        str,
-    attr_type:  bool,
+    key:             str,
+    attr_type:       bool,
     attr:       dict[str, Any] | None   = None,
-    cdata:      bool                    = False               # is used in fct calls
+    cdata:           bool               = False               # is used in fct calls
 )                                                                   -> str:
     """Converts a null value into an XML element"""
     if  attr         is None:
@@ -931,12 +926,12 @@ def dicttoxml(
                                 'custom_array_item_wrap':   'node',
                                 'array_headers':            False,  # wrap each array item into the outer header (see also wrap_array_items) 
     },
-    xpath_format:   bool                    = False,                # default is False
-    use_root:       bool                    = True,                 # default is True;  wrap the output into an XML root element
-    custom_root:    str                     = "root",               # default is "root"; TODO or better use custom_root?
+    xpath_format:        bool               = False,                # default is False
+    use_root:            bool               = True,                 # default is True;  wrap the output into an XML root element
+    custom_root:         str                = "root",               # default is "root"; TODO or better use custom_root?
     # wrap_array_items:   bool                = True,               # default is True;  wrap each array item into a tag
     # array_items_wrap:   Callable[[str], str]= default_item_func,  # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
-    only_read_folder:   str                 = "",
+    only_read_folder:    str                = "",
     ids:            list[int]      | None   = None,                 # default is None;  elements get unique ids; default is list[str]
     xml_namespaces: dict[str, Any] | None   = None,                 # default is None
 )                                                                   -> bytes:
