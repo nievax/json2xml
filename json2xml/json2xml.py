@@ -60,17 +60,18 @@ class Json2xml:
                         content                 =              self.data[self.only_read_folder]
                 elif    self.not_read_folder   != "":
                         content                 = self.exclude(self.data, self.not_read_folder)
-            xml_data                            = dicttoxml.dicttoxml(
-                        content,
+            xml_data = dicttoxml.dicttoxml(
+                content,
+                bundle                          = { 'attr_type':                self.attr_type,
+                                                    'cdata':                    self.cdata,
+                                                    'custom_array_item_wrap':   self.custom_array_item_wrap,
+                                                    'array_headers':            self.array_headers,
+                                                    },
                 xpath_format                    = self.xpath_format,
                 use_root                        = self.use_root,
                 custom_root                     = self.custom_root,
                 # wrap_array_items              = self.wrap_array_items,
                 # array_items_wrap              = self.array_items_wrap,
-                custom_array_item_wrap          = self.custom_array_item_wrap,
-                array_headers                   = self.array_headers,
-                attr_type                       = self.attr_type,
-                cdata                           = self.cdata,
                 ids                             = self.ids,
                 xml_namespaces                  = self.xml_namespaces,
                 only_read_folder                = self.only_read_folder,
