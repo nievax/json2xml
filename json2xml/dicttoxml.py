@@ -640,7 +640,6 @@ def convert_dict(
 
     output: list[str] = []
     attr:   dict[str, str]
-    addline           = output.append       # ??
     for key, val in obj.items():
         if   ids:
              attr     = {"id": get_unique_id(parent)}
@@ -653,7 +652,7 @@ def convert_dict(
         # here, we just change order and check for bool first, because no other
         # type other than bool can be true for bool check
         if   isinstance(val, bool):
-            addline(
+            output.append(
                 convert_bool(
                     key,
                     val,
@@ -663,7 +662,7 @@ def convert_dict(
                 )
             )
         elif isinstance(val, (numbers.Number, str)):
-            addline(
+            output.append(
                 convert_number(
                     key=key,
                     val=val,
@@ -673,7 +672,7 @@ def convert_dict(
                 )
             )
         elif hasattr(val, "isoformat"):  # datetime
-            addline(
+            output.append(
                 convert_number(
                     key=key,
                     val=val.isoformat(),            # difference
@@ -683,7 +682,7 @@ def convert_dict(
                 )
             )
         elif isinstance(val, dict):
-            addline(
+            output.append(
                 dict2xml_str(
                     val,
                     key,
@@ -698,7 +697,7 @@ def convert_dict(
                 )
             )
         elif isinstance(val, Sequence):
-            addline(
+            output.append(
                 list2xml_str(
                     item=val,
                     item_name=key,
@@ -711,7 +710,7 @@ def convert_dict(
                 )
             )
         elif not val:
-            addline(
+            output.append(
                 convert_none(
                     key,
                     attr_type,
@@ -738,8 +737,7 @@ def convert_list(
 
     output: list[str]   = []
     attr:   dict[str, str]
-    addline             = output.append     ## ??
-    # orig. was: item_name = array_items_wrap(parent)
+    # TODO orig. was: item_name = array_items_wrap(parent)
     item_name           = custom_array_item_wrap  # Is item_name still relevant if wrap_array_items is false
     if  item_name.endswith("@flat"):
         item_name       = item_name[:-5]          # remove "@flat"
@@ -749,7 +747,7 @@ def convert_list(
         else:
             attr        = {}
         if item is None:
-                addline(
+                output.append(
                     convert_none(
                         item_name,
                         # difference: no item
@@ -759,7 +757,7 @@ def convert_list(
                     )
                 )
         elif isinstance(item, bool):
-                addline(
+                output.append(
                     convert_bool(
                         item_name,
                         item,
@@ -770,7 +768,7 @@ def convert_list(
                 )
         elif isinstance(item, (numbers.Number, str)):
             if  custom_array_item_wrap != '':
-                addline(
+                output.append(
                     convert_number(
                         key=item_name,
                         val=item,
@@ -780,7 +778,7 @@ def convert_list(
                     )
                 )
             else:   # not wrap_array_items
-                addline(
+                output.append(
                     convert_number(
                         key=parent,             # difference
                         val=item,
@@ -790,7 +788,7 @@ def convert_list(
                     )
                 )
         elif hasattr(item, "isoformat"):  # datetime
-                addline(
+                output.append(
                     convert_number(
                         key=item_name,
                         val=item.isoformat(),   # difference
@@ -800,7 +798,7 @@ def convert_list(
                     )
                 )
         elif isinstance(item, dict):
-                addline(
+                output.append(
                     dict2xml_str(
                         item=item,
                         item_name=item_name,
@@ -816,7 +814,7 @@ def convert_list(
                     )
                 )
         elif isinstance(item, Sequence):
-                addline(
+                output.append(
                     list2xml_str(
                         item=item,
                         item_name=item_name,
