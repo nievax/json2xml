@@ -6,6 +6,8 @@
 
 - hierarchische CVs testen
 
+- look for .append (+ blame: where + why changed?)
+
 - Architektur verstehen: wie hängen fcts zus.? (vgl. Doku)
 
 - eigene Features einbauen (vgl. sync.py: make_node usw.)
