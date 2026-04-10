@@ -601,15 +601,15 @@ def convert(
     ids:                         Any,        # default is list[str]
     # array_items_wrap:       Callable[[str], str],
     # wrap_array_items:       bool,
-    parent:                      str        = "root",        # TODO or better use custom_root?
+    parent:                     str     = "root",        # TODO or better use custom_root?
 ) -> str:
     """Routes the elements of an object to the right function
     to convert them based on their data type"""
-    attr_type:                   bool       = bundle['attr_type']
-    cdata:                       bool       = bundle['cdata']
-    custom_array_item_wrap:      str        = bundle['custom_array_item_wrap']
-    array_headers:               bool       = bundle['array_headers']
-
+    return_name:                str     = ""
+    attr_type:                  bool    = bundle['attr_type']
+    cdata:                      bool    = bundle['cdata']
+    custom_array_item_wrap:     str     = bundle['custom_array_item_wrap']
+    array_headers:              bool    = bundle['array_headers']
     # item_name = array_items_wrap(parent)
     item_name = custom_array_item_wrap
 
@@ -618,30 +618,24 @@ def convert(
     # and hence we get wrong value for the xml type bool here;
     # we just change order and check for bool first,
     # because no other type than bool can be true for bool check
-    if  isinstance(obj, bool):
-        return   convert_bool(  item_name, obj,             attr_type,     cdata=cdata)
-
-    if  isinstance(obj, (numbers.Number,    str)):
-        return   convert_number(item_name, obj,             attr_type, {}, cdata)
-
-    if  isinstance(obj, (datetime.datetime, datetime.date)) and hasattr(obj, "isoformat") :
-        return   convert_number(item_name, obj.isoformat(), attr_type, {}, cdata)
-
-    if  obj is          None:
-        return   convert_none(  item_name,                  attr_type,     cdata=cdata)
-
-    if  isinstance(obj, dict):
-        return   convert_dict(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
-                              cast("dict[str, Any]", obj),
-                              ids,
-                              parent)
-
-    if  isinstance(obj, Sequence):
-        return   convert_list(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
-                              obj,
-                              ids,
-                              parent)
-    raise TypeError('Unsupported data type: ' + str(obj) + ' (' + type(obj).__name__ + ')' )
+    match obj:
+        case bool():
+            return_name = convert_bool(  item_name, obj,             attr_type,     cdata=cdata)
+        case numbers.Number()     | str() :
+            return_name = convert_number(item_name, obj,             attr_type, {}, cdata)
+        case (datetime.datetime() | datetime.date()) if hasattr(obj, "isoformat") :
+            return_name = convert_number(item_name, obj.isoformat(), attr_type, {}, cdata)
+        case None:
+            return_name = convert_none(  item_name,                  attr_type,     cdata=cdata)
+        case dict():
+            return_name = convert_dict(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
+                              cast("dict[str, Any]", obj), ids, parent)
+        case Sequence():
+            return_name =convert_list(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
+                              obj,                         ids, parent)
+        case _:
+            raise TypeError('Unsupported data type: ' + str(obj) + ' (' + type(obj).__name__ + ')' )
+    return  return_name
 
 def convert_dict(
     bundle:                 dict[str, Any],
@@ -669,65 +663,24 @@ def convert_dict(
         # never comes and hence we get wrong value for the xml type bool
         # here, we just change order and check for bool first, because no other
         # type other than bool can be true for bool check
-        if   isinstance(val, bool):
-            output.append(
-                convert_bool(
-                    key,
-                    val,
-                    attr_type,
-                    attr,
-                    cdata,
-                )
-            )
-        elif isinstance(val, (numbers.Number, str)):
-            output.append(
-                convert_number(
-                    key,
-                    val,
-                    attr_type,
-                    attr,
-                    cdata,
-                )
-            )
-        elif hasattr(val, "isoformat"):  # datetime
-            output.append(
-                convert_number(
-                    key,
-                    val.isoformat(),            # difference
-                    attr_type,
-                    attr,
-                    cdata,
-                )
-            )
-        elif isinstance(val, dict):
-            output.append(
-                dict2xml_str(
-                    make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers, attr),
-                    val,
-                    key,
-                    False,      # parent_is_list
-                )
-            )
-        elif isinstance(val, Sequence):
-            output.append(
-                list2xml_str(
-                    make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers, attr),
-                    val,
-                    key,
+        match val:
+            case bool():
+                output.append(convert_bool(  key, val,              attr_type, attr, cdata, ) )
+            case numbers.Number() | str():
+                output.append(convert_number(key, val,              attr_type, attr, cdata, ) )
+            case (datetime.datetime() | datetime.date()) if hasattr(val, "isoformat"):
+                output.append(convert_number(key, val.isoformat(),  attr_type, attr, cdata, ) )
+            case dict():
+                output.append(dict2xml_str(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers, attr),
+                                                                    val, key, False,        ) )
+            case Sequence():
+                output.append(list2xml_str(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers, attr),
+                                                                    val, key,               ) )
                     # wrap_array_items=wrap_array_items,
-                )
-            )
-        elif not val:
-            output.append(
-                convert_none(
-                    key,
-                    attr_type,
-                    attr,
-                    cdata,
-                )
-            )
-        else:
-            raise TypeError('Unsupported data type: ' + val + '(' + type(val).__name__ + ')')
+            case None:
+                output.append(convert_none(  key,                   attr_type, attr, cdata, ) )
+            case _:
+                raise TypeError('Unsupported data type: ' + val + '(' + type(val).__name__ + ')')
     return ''.join(output)
 
 def convert_list(
@@ -754,81 +707,29 @@ def convert_list(
             attr        = {'id': str(get_unique_id(parent)) + '_' + str(i)}
         else:
             attr        = {}
-        if item is None:
-                output.append(
-                    convert_none(
-                        item_name,
-                        # difference: no item
-                        attr_type,
-                        attr,
-                        cdata
-                    )
-                )
-        elif isinstance(item, bool):
-                output.append(
-                    convert_bool(
-                        item_name,
-                        item,
-                        attr_type,
-                        attr,
-                        cdata
-                    )
-                )
-        elif isinstance(item, (numbers.Number, str)):
-            if  custom_array_item_wrap != '':
-                output.append(
-                    convert_number(
-                        item_name,
-                        item,
-                        attr_type,
-                        attr,
-                        cdata,
-                    )
-                )
-            else:   # not wrap_array_items
-                output.append(
-                    convert_number(
-                        parent,             # difference
-                        item,
-                        attr_type,
-                        attr,
-                        cdata,
-                    )
-                )
-        elif hasattr(item, "isoformat"):  # datetime
-                output.append(
-                    convert_number(
-                        item_name,
-                        item.isoformat(),   # difference
-                        attr_type,
-                        attr,
-                        cdata,
-                    )
-                )
-        elif isinstance(item, dict):
-                output.append(
-                    dict2xml_str(
-                        make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers, attr),
-                        item,
-                        item_name,
+        match item:
+            case None:
+                output.append(convert_none(  item_name,                   attr_type, attr, cdata, ))
+            case bool():
+                output.append(convert_bool(  item_name, item,             attr_type, attr, cdata, ))
+            case (numbers.Number() | str()) if custom_array_item_wrap != '':
+                output.append(convert_number(item_name, item,             attr_type, attr, cdata, ))
+            case (numbers.Number() | str()) if custom_array_item_wrap == '':
+                output.append(convert_number(parent,    item,             attr_type, attr, cdata, ))
+            case (datetime.date() | datetime.datetime()) if hasattr(item, "isoformat"):
+                output.append(convert_number(item_name, item.isoformat(), attr_type, attr, cdata, ))
+            case dict():
+                output.append(dict2xml_str(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers, attr),
+                                                        item, item_name, True, parent,            ))
                         # wrap_array_items=wrap_array_items,
                         # array_items_wrap=array_items_wrap,
-                        True,               # difference
-                        parent,             # difference
-                    )
-                )
-        elif isinstance(item, Sequence):
-                output.append(
-                    list2xml_str(
-                        make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers, attr),
-                        item,
-                        item_name,
+            case Sequence():
+                output.append(list2xml_str(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers, attr),
+                                                        item, item_name,                          ))
                         # wrap_array_items=wrap_array_items,
                         # array_items_wrap=array_items_wrap,
-                    )
-                )
-        else:
-            raise TypeError('Unsupported data type: ' + item + '(' + type(item).__name__ + ')')
+            case _:
+                raise TypeError('Unsupported data type: ' + item + '(' + type(item).__name__ + ')')
     return ''.join(output)
 
 # TODO make a general fct out of these ("convert a value into an XML element"):
