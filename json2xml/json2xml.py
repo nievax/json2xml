@@ -27,9 +27,9 @@ class Json2xml:
         self.use_root               = active_config["use_root"]                 # bool          default is True;  the output is wrapped into an XML root element
         self.custom_root            = active_config["custom_root"]              # str           default is "root"
 
-        self.wrap_array_items       = active_config["wrap_array_items"]         # bool          default is True;  wrap each array item  into a tag;                 TODO use for DS?
+        # self.wrap_array_items       = active_config["wrap_array_items"]       # bool          default is True;  wrap each array item  into a tag;                 TODO use for DS?
         # self.array_items_wrap       = array_items_wrap,                       # fct           default is default_item_func / "item";                              TODO make this work
-        self.custom_array_item_wrap = active_config["custom_array_item_wrap"]   # see above
+        self.custom_array_item_wrap = active_config["custom_array_item_wrap"]   # str           wrap each array item into this tag, except ""
 
         self.array_headers          = active_config["array_headers"]            # bool          default is False; repeat the outer header for each array element;   TODO use for DS?
         self.attr_type              = active_config["attr_type"]                # bool          default is True;  display data type
@@ -65,7 +65,7 @@ class Json2xml:
                 xpath_format                    = self.xpath_format,
                 use_root                        = self.use_root,
                 custom_root                     = self.custom_root,
-                wrap_array_items                = self.wrap_array_items,
+                # wrap_array_items              = self.wrap_array_items,
                 # array_items_wrap              = self.array_items_wrap,
                 custom_array_item_wrap          = self.custom_array_item_wrap,
                 array_headers                   = self.array_headers,

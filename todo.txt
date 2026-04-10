@@ -1,7 +1,3 @@
-- zus.fsn. (str or "false"):
-    - root / custom root (use_root false makes no sense in comb. with pretty / parse?!)
-    - array item wrap x2
-
 - array_headers testen in Kombi mit wrap_array_items
 
 - hierarchische CVs testen
@@ -12,7 +8,7 @@
 
 - eigene Features einbauen (vgl. sync.py: make_node usw.)
 
-- CodeSmell.xls checken; gelbe Warnings; unterpunktete Funktionen; for/if: continue
+- CodeSmell.xls checken; gelbe Warnings; unterpunktete Funktionen
 
 - config:
     - evtl. jsonc oder json5 nutzen?

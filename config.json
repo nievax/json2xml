@@ -10,9 +10,7 @@
                 "use_root"                  : false,
                 "custom_root"               : "isComposedBy",
 
-                "wrap_array_items"          : true,
                 "custom_array_item_wrap"    : "node",
-
                 "attr_type"                 : false,
                 "cdata"                     : false,
                 "array_headers"             : false,
@@ -29,9 +27,7 @@
                 "use_root"                  : true,
                 "custom_root"               : "root",
 
-                "wrap_array_items"          : true,
                 "custom_array_item_wrap"    : "alpen",
-
                 "attr_type"                 : true,
                 "cdata"                     : true,
                 "array_headers"             : true,

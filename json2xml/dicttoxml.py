@@ -489,7 +489,7 @@ def dict2xml_str(
     attr_type:              bool,
     attr:                   dict[str, Any],
     cdata:                  bool,
-    wrap_array_items:       bool,
+    # wrap_array_items:       bool,
     # array_items_wrap: Callable[[str], str],
     custom_array_item_wrap: str,
     parent_is_list:         bool,
@@ -516,15 +516,15 @@ def dict2xml_str(
     else:
         # we can not use convert_dict, because rawitem could be non-dict
              subtree      = convert(
-                            rawitem, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, item_name, array_headers=array_headers
+                            rawitem, ids, attr_type, cdata,  custom_array_item_wrap, item_name, array_headers=array_headers
                             )
     if parent_is_list and array_headers:
-        if len(val_attr)  > 0 and not wrap_array_items:
+        if len(val_attr)  > 0                        and     custom_array_item_wrap != '':
             attrstring    = make_attrstring(val_attr)
             return_value  = make_tag( parent,    attrstring, subtree)
         else:
             return_value  = make_tag( parent,    '',         subtree)
-    elif item.get("@flat", False) or (parent_is_list and not wrap_array_items):
+    elif item.get("@flat", False) or (parent_is_list and     custom_array_item_wrap != ''):
             return_value  =                                  subtree
     else:
             attrstring    = make_attrstring(val_attr)
@@ -537,7 +537,7 @@ def list2xml_str(
     attr_type:              bool,
     attr:                   dict[str, Any],
     cdata:                  bool,
-    wrap_array_items:       bool,
+    # wrap_array_items:       bool,
     # array_items_wrap: Callable[[str], str],
     custom_array_item_wrap: str,
     array_headers:          bool = False,
@@ -562,14 +562,14 @@ def list2xml_str(
         attr_type=attr_type,
         cdata=cdata,
         parent=item_name,
-        wrap_array_items=wrap_array_items,
+        # wrap_array_items=wrap_array_items,
         # array_items_wrap=array_items_wrap,
         custom_array_item_wrap = custom_array_item_wrap,
         array_headers=array_headers
     )
     if flat             \
     or array_headers    \
-    or (len(item) > 0 and is_primitive_type(item[0]) and not wrap_array_items):
+    or (len(item) > 0 and is_primitive_type(item[0]) and custom_array_item_wrap != ''):
         return_value = subtree
     else:
         attrstring   = make_attrstring(attr)
@@ -585,7 +585,7 @@ def convert(
     attr_type:              bool,
     # array_items_wrap:       Callable[[str], str],
     cdata:                  bool,
-    wrap_array_items:       bool,
+    # wrap_array_items:       bool,
     custom_array_item_wrap: str,
     parent:                 str     =   "root",        # TODO or better use custom_root?
     array_headers:          bool    =    False,
@@ -617,10 +617,10 @@ def convert(
         return   convert_none(  key=item_name,                      attr_type=attr_type,          cdata=cdata)
 
     elif isinstance(obj, dict):
-        return   convert_dict(cast("dict[str, Any]", obj), ids, attr_type, cdata, parent, wrap_array_items, custom_array_item_wrap, array_headers=array_headers)
+        return   convert_dict(cast("dict[str, Any]", obj), ids, attr_type, cdata, parent, custom_array_item_wrap, array_headers=array_headers)
 
     elif isinstance(obj, Sequence):
-        return   convert_list(                        obj, ids, attr_type, cdata, parent, wrap_array_items, custom_array_item_wrap, array_headers=array_headers)
+        return   convert_list(                        obj, ids, attr_type, cdata, parent, custom_array_item_wrap, array_headers=array_headers)
 
     else:
         raise TypeError('Unsupported data type: ' + str(obj) + ' (' + type(obj).__name__ + ')' )
@@ -631,7 +631,7 @@ def convert_dict(
     attr_type:                  bool,
     cdata:                      bool,
     parent:                     str,
-    wrap_array_items:           bool,
+    # wrap_array_items:           bool,
     # array_items_wrap: Callable[[str], str],
     custom_array_item_wrap:     str,
     array_headers:              bool = False
@@ -690,7 +690,7 @@ def convert_dict(
                     attr_type,
                     attr,
                     cdata,
-                    wrap_array_items,               # difference
+                    # wrap_array_items,             # difference
                     custom_array_item_wrap,         # difference
                     False,      # parent_is_list?   # difference
                     # no line for parent?
@@ -705,7 +705,7 @@ def convert_dict(
                     attr_type=attr_type,
                     attr=attr,
                     cdata=cdata,
-                    wrap_array_items=wrap_array_items,
+                    # wrap_array_items=wrap_array_items,
                     custom_array_item_wrap=custom_array_item_wrap,
                     array_headers=array_headers,
                 )
@@ -729,7 +729,7 @@ def convert_list(
     attr_type:              bool,
     cdata:                  bool,
     parent:                 str,
-    wrap_array_items:       bool,
+    # wrap_array_items:       bool,
     # array_items_wrap: Callable
     custom_array_item_wrap: str,
     array_headers:          bool = False,
@@ -769,7 +769,7 @@ def convert_list(
                     )
                 )
         elif isinstance(item, (numbers.Number, str)):
-            if  wrap_array_items:
+            if  custom_array_item_wrap != '':
                 addline(
                     convert_number(
                         key=item_name,
@@ -807,7 +807,7 @@ def convert_list(
                         attr_type=attr_type,
                         attr=attr,
                         cdata=cdata,
-                        wrap_array_items=wrap_array_items,
+                        # wrap_array_items=wrap_array_items,
                         # array_items_wrap=array_items_wrap,
                         custom_array_item_wrap=custom_array_item_wrap,
                         parent_is_list=True,                # difference
@@ -823,7 +823,7 @@ def convert_list(
                         attr_type=attr_type,
                         attr=attr,
                         cdata=cdata,
-                        wrap_array_items=wrap_array_items,
+                        # wrap_array_items=wrap_array_items,
                         # array_items_wrap=array_items_wrap,
                         custom_array_item_wrap=custom_array_item_wrap,
                         array_headers=array_headers
@@ -930,7 +930,7 @@ def dicttoxml(
     use_root:       bool                    = True,                 # default is True;  wrap the output into an XML root element
     custom_root:    str                     = "root",               # default is "root"; TODO or better use custom_root?
 
-    wrap_array_items:   bool                = True,                 # default is True;  wrap each array item into a tag
+    # wrap_array_items:   bool                = True,               # default is True;  wrap each array item into a tag
     # array_items_wrap:   Callable[[str], str]= default_item_func,  # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
     custom_array_item_wrap: str             = 'node',
 
@@ -960,6 +960,6 @@ def dicttoxml(
                 custom_root = 'root'    # custom root is needed in every case ...
                                         # ... to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
         output_elem         = convert(
-            obj, ids, attr_type, cdata, wrap_array_items, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
+            obj, ids, attr_type, cdata, custom_array_item_wrap, parent=custom_root, array_headers=array_headers)
         output              = prolog + make_tag(custom_root, namespace_str, output_elem)
     return ''.join(output).encode('utf-8')
