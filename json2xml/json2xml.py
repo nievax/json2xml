@@ -8,7 +8,7 @@ from .utils             import readfromjson
 
 config                  = readfromjson("config.json")
 active_profile: str     = config["active"]              # 'dspace' or 'custom'
-actual_config:  dict    = config[active_profile]
+active_config:  dict    = config[active_profile]
 
 class Json2xml:
     """Wrapper class to convert the data to xml"""
@@ -21,21 +21,21 @@ class Json2xml:
         self.only_read_folder       =        config["only_read_folder"]         # str           default is ""
         self.not_read_folder        =        config["not_read_folder"]          # str           default is ""
 
-        self.pretty                 = actual_config["pretty"]                   # bool          default is True;  new lines + indenting; False gives no string, but bytes
-        self.xpath_format           = actual_config["xpath_format"]             # bool          default is False
+        self.pretty                 = active_config["pretty"]                   # bool          default is True;  new lines + indenting; False gives no string, but bytes
+        self.xpath_format           = active_config["xpath_format"]             # bool          default is False
 
-        self.use_root               = actual_config["use_root"]                 # bool          default is True;  the output is wrapped into an XML root element
-        self.custom_root            = actual_config["custom_root"]              # str           default is "root"
+        self.use_root               = active_config["use_root"]                 # bool          default is True;  the output is wrapped into an XML root element
+        self.custom_root            = active_config["custom_root"]              # str           default is "root"
 
-        self.wrap_array_items       = actual_config["wrap_array_items"]         # bool          default is True;  wrap each array item  into a tag;                 TODO use for DS?
+        self.wrap_array_items       = active_config["wrap_array_items"]         # bool          default is True;  wrap each array item  into a tag;                 TODO use for DS?
         # self.array_items_wrap       = array_items_wrap,                       # fct           default is default_item_func / "item";                              TODO make this work
-        self.custom_array_item_wrap = actual_config["custom_array_item_wrap"]   # see above
+        self.custom_array_item_wrap = active_config["custom_array_item_wrap"]   # see above
 
-        self.array_headers          = actual_config["array_headers"]            # bool          default is False; repeat the outer header for each array element;   TODO use for DS?
-        self.attr_type              = actual_config["attr_type"]                # bool          default is True;  display data type
-        self.cdata                  = actual_config["cdata"]                    # bool          default is False; wrap string values    into CDATA sections
-        self.ids                    = actual_config["ids"]                      # list[str]     default is  [];   elements get unique ids; or list[int]?
-        self.xml_namespaces         = actual_config["xml_namespaces"]           # dict[str, Any] default is {}
+        self.array_headers          = active_config["array_headers"]            # bool          default is False; repeat the outer header for each array element;   TODO use for DS?
+        self.attr_type              = active_config["attr_type"]                # bool          default is True;  display data type
+        self.cdata                  = active_config["cdata"]                    # bool          default is False; wrap string values    into CDATA sections
+        self.ids                    = active_config["ids"]                      # list[str]     default is  [];   elements get unique ids; or list[int]?
+        self.xml_namespaces         = active_config["xml_namespaces"]           # dict[str, Any] default is {}
                                                                                 #                example is {"xsi":{"schemaInstance":            "http://www.w3.org/2001/XMLSchema-instance",
                                                                                 #                                   "noNamespaceSchemaLocation": "controlledvocabulary.xsd"
                                                                                 #                                   }
