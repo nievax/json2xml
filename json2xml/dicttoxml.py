@@ -3,10 +3,6 @@
 
     :param dict obj:
 
-    :param bool use_root:
-        output is wrapped in an XML root element
-        default is True
-
     :param str custom_root:
         specify a custom root element
         default is 'root'
@@ -828,7 +824,6 @@ def dicttoxml(
                                 'array_headers':            False,  # wrap each array item into the outer header (see also wrap_array_items) 
     },
     xpath_format:        bool               = False,                # default is False
-    use_root:            bool               = True,                 # default is True;  wrap the output into an XML root element
     custom_root:         str                = "root",               # default is "root"; TODO or better use custom_root?
     # wrap_array_items:   bool                = True,               # default is True;  wrap each array item into a tag
     # array_items_wrap:   Callable[[str], str]= default_item_func,  # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
@@ -850,10 +845,10 @@ def dicttoxml(
         output              = set_xpath(obj)
     else:
         namespace_str       = set_namespace_str(xml_namespaces)
-        if  use_root is False:                    # TODO instead of this, integrate it into fct as default value:
+        if  custom_root == '':                    # TODO instead of this, integrate it into fct as default value:
             if  only_read_folder:       #      != ''
                 custom_root = only_read_folder
-            else:       # if  only_read_folder == ''
+            else:       #  if only_read_folder == ''
                 custom_root = 'root'    # custom root is needed in every case ...
                                         # ... to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
         output_elem         = convert(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
