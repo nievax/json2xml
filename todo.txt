@@ -1,5 +1,7 @@
 - orig. maketag() usw. einbauen
 
+- dicttoxml umbenennen: gilt nur für dict?
+
 - array_headers testen in Kombi mit wrap_array_items
 
 - hierarchische CVs testen
