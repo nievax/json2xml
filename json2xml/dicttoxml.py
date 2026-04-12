@@ -556,7 +556,7 @@ def dict2xml_str(
              subtree      = escape_xml(     rawitem)
     else:
         # we can not use convert_dict, because rawitem could be non-dict
-             subtree      = convert(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
+             subtree      = convert(bundle,
                                     rawitem,
                                     ids,
                                     item_name,
@@ -600,7 +600,7 @@ def list2xml_str(
         flat      = False
     subtree = ""           # Initialize subtree with default empty string
     subtree = convert_list(
-        make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
+        bundle,
         item,
         ids,
         item_name,
@@ -652,11 +652,9 @@ def convert(
         case None:
             return_name = convert_none(  item_name,                  attr_type,     cdata=cdata)
         case dict():
-            return_name = convert_dict(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
-                              cast("dict[str, Any]", obj), ids, parent)
+            return_name = convert_dict(bundle, cast("dict[str, Any]", obj), ids, parent)
         case Sequence():
-            return_name =convert_list(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
-                              obj,                         ids, parent)
+            return_name = convert_list(bundle, obj,                         ids, parent)
         case _:
             raise TypeError('Unsupported data type: ' + str(obj) + ' (' + type(obj).__name__ + ')' )
     return  return_name
@@ -883,9 +881,6 @@ def dicttoxml(
                 custom_root = 'root'    # custom root is needed in every case ...
                                         # ... to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
         # main fct:
-        output_elem         = convert(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
-                                      obj,
-                                      ids,
-                                      custom_root)
+        output_elem         = convert(bundle, obj, ids, custom_root)
         output              = PROLOG + make_tag(custom_root, namespace_str, output_elem)
     return ''.join(output).encode('utf-8')
