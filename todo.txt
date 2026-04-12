@@ -20,4 +20,4 @@
 
 - Doku updaten
 
-- nachziehen / anpassen: cli.py, _fast.py, ...
+- nachziehen / anpassen: cli.py, _fast.py, ... oder löschen

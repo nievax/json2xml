@@ -15,6 +15,8 @@ class Json2xml:
 
     def __init__(self, data:   dict[str, Any] | list[Any] | None = None,):
         # TODO only (active) config weitergeben?
+
+        # TODO self.bundle          = ...
         self.data                   = data
         self.only_read_folder       =        config["only_read_folder"]         # str           default is ""
         self.not_read_folder        =        config["not_read_folder"]          # str           default is ""

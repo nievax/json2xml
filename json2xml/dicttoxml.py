@@ -181,6 +181,7 @@ from decimal            import Decimal
 from fractions          import Fraction
 from random             import SystemRandom
 from typing             import Any, Union, cast
+from json2xml           import Json2xml
 
 from defusedxml.minidom import parseString
 
@@ -399,6 +400,21 @@ def open_tag( tag_name: str, attrs: str = '')                       -> str:
     '''docstring'''
     return                    '<'     + tag_name + distance(attrs) + attrs + '>'
 
+
+    # def open_tag( tagname: str, attributes: dict|None = None, cont:    str = '') -> str:
+    #     '''open tag string'''
+    #     attribute_strings           = ""
+    #     if  attributes is not None:
+    #         for key, value in attributes.items():
+    #             attribute_strings  +=  ' ' + key + '="' + value + '"'
+    #     opening_symbol              =  '<'
+    #     if  cont != '':
+    #         closing_symbol          =  '>'
+    #     else:   # cont == '' / empty is True:
+    #         closing_symbol          = '/>'
+    #     return '       '    + opening_symbol + tagname + attribute_strings  + closing_symbol
+
+
 def close_tag(tag_name: str)                                        -> str:
     '''docstring'''
     return                    '</'    + tag_name                           + '>'
@@ -412,6 +428,18 @@ def make_tag( tag_name: str, attrs: str = '', content: str = '')    -> str:
     else:   # content == ''
         return_value        = '<'     + tag_name + distance(attrs) + attrs + '/>'
     return return_value
+
+
+    # def make_node(tagname: str, attributes: dict|None = None, content: str = '') -> str:
+    #     '''generate a tag string'''
+    #     if  content     != '':
+    #         element     = open_tag(  tagname, attributes, content)  + line_break    \
+    #                     + content                                   + line_break    \
+    #                     + close_tag( tagname)                       + line_break
+    #     else:   # content == ""
+    #         element     = open_tag(  tagname, attributes)           + line_break    # empty_tag
+    #     return element
+
 
 # ##############################################
 
@@ -590,7 +618,7 @@ def list2xml_str(
 
 # ##############################################
 
-# TODO understand
+# TODO understan; main fct:
 def convert(
     bundle:                 dict[str, Any],
     obj:                    ELEMENT,
@@ -817,6 +845,10 @@ def set_namespace_str(xml_namespaces: dict[str, Any])               -> str:
 
 def dicttoxml(
     obj:            ELEMENT,
+    bla:            Json2xml,
+)                                                                   -> bytes:
+    '''docstring: see top of file'''
+    # TODO: bundle = bla.bundle ...
     bundle:         dict[str, Any]          = {
                                 'attr_type':                True,   # display data type
                                 'cdata':                    False,  # wrap string values   into CDATA sections
@@ -830,8 +862,7 @@ def dicttoxml(
     only_read_folder:    str                = "",
     ids:            list[int]      | None   = None,                 # default is None;  elements get unique ids; default is list[str]
     xml_namespaces: dict[str, Any] | None   = None,                 # default is None
-)                                                                   -> bytes:
-    '''docstring: see top of file'''
+
     output                                  = ''
     attr_type:              bool            = bundle['attr_type']
     cdata:                  bool            = bundle['cdata']
@@ -851,6 +882,7 @@ def dicttoxml(
             else:       #  if only_read_folder == ''
                 custom_root = 'root'    # custom root is needed in every case ...
                                         # ... to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
+        # main fct:
         output_elem         = convert(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
                                       obj,
                                       ids,
