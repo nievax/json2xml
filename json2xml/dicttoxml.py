@@ -401,6 +401,7 @@ def open_tag( tag_name: str, attrs: str = '')                       -> str:
     return                    '<'     + tag_name + distance(attrs) + attrs + '>'
 
 
+    # TODO
     # def open_tag( tagname: str, attributes: dict|None = None, cont:    str = '') -> str:
     #     '''open tag string'''
     #     attribute_strings           = ""
@@ -429,7 +430,7 @@ def make_tag( tag_name: str, attrs: str = '', content: str = '')    -> str:
         return_value        = '<'     + tag_name + distance(attrs) + attrs + '/>'
     return return_value
 
-
+    # TODO
     # def make_node(tagname: str, attributes: dict|None = None, content: str = '') -> str:
     #     '''generate a tag string'''
     #     if  content     != '':
