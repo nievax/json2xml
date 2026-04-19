@@ -7,44 +7,43 @@ Basic Usage
 
 The json2xml library provides three main ways to read JSON data:
 
-* From a JSON file using ``readfromjson``
-* From a URL using ``readfromurl``
-* From a string using ``readfromstring``
+* From a JSON string using ``readfromstring``
+* From a JSON file   using ``readfromfile``
+* From a JSON URL    using ``readfromurl``
 
 Here's how to use each method:
 
 .. code-block:: python
 
-    from json2xml import json2xml
-    from json2xml.utils import readfromurl, readfromstring, readfromjson
+    from json2xml       import json2xml
+    from json2xml.utils import readfromstring, readfromfile, readfromurl
 
-    # Convert JSON data from a URL to XML
-    data = readfromurl("https://api.example.com/data")
-    print(json2xml.Json2xml(data).to_xml())
-
-    # Convert a JSON string to XML
+    # convert JSON data from a string to XML
     data = readfromstring(
-        '{"login":"mojombo","id":1,"avatar_url":"https://example.com/avatar.png"}'
+        '{"login":"mojombo", "id":1, "avatar_url":"https://example.com/avatar.png"}'
     )
     print(json2xml.Json2xml(data).to_xml())
 
-    # Convert a JSON file to XML
-    data = readfromjson("examples/licht.json")
+    # convert JSON data from a file   to XML
+    data = readfromfile("examples/licht.json")
     print(json2xml.Json2xml(data).to_xml())
 
+    # convert JSON data from a URL    to XML
+    data = readfromurl("https://api.example.com/data")
+    print(json2xml.Json2xml(data).to_xml())
 
 Constructor Parameters
 ----------------------
 
 The ``Json2xml`` class accepts the following parameters:
 
-* ``data`` - The JSON data (dict or list) to convert
-* ``wrapper`` (default: ``"all"``) - Custom root element name
-* ``root`` (default: ``True``) - Whether to include the XML declaration and root element
-* ``pretty`` (default: ``True``) - Whether to pretty-print the XML output
-* ``attr_type`` (default: ``True``) - Whether to include type attributes on elements
-* ``item_wrap`` (default: ``True``) - Whether to wrap list items in ``<item>`` tags
-* ``xpath_format`` (default: ``False``) - Whether to use XPath 3.1 compliant output format
+* ``data``                                  - the JSON data (dict or list) to convert
+* ``wrapper``       (default: ``"all"``)    - Custom root element name
+* ``root``          (default: ``True``)     - whether to include the XML declaration and root element
+* ``pretty``        (default: ``True``)     - whether to pretty-print the XML output
+* ``attr_type``     (default: ``True``)     - whether to include type attributes on elements
+* ``item_wrap``     (default: ``True``)     - whether to wrap list items in ``<item>`` tags
+* ``xpath_format``  (default: ``False``)    - whether to use XPath 3.1 compliant output format
 
 
 Custom Wrappers and Indentation
@@ -211,16 +210,16 @@ Error Handling
 
 The library provides custom exceptions for error handling:
 
-* ``JSONReadError`` - Raised when there's an error reading a JSON file
-* ``URLReadError`` - Raised when there's an error fetching data from a URL
-* ``StringReadError`` - Raised when there's an error parsing a JSON string
 * ``InvalidDataError`` - Raised when the data cannot be converted to valid XML
+* ``StringReadError``  - Raised when there's an error parsing  from a JSON string
+* ``FileReadError``    - Raised when there's an error reading  from a JSON file
+* ``URLReadError``     - Raised when there's an error fetching from a JSON URL
 
 Example:
 
 .. code-block:: python
 
-    from json2xml import json2xml
+    from json2xml       import json2xml
     from json2xml.utils import readfromstring, StringReadError
 
     try:

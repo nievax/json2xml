@@ -292,7 +292,7 @@ Documentation:
 3.19.3 / 2022-07-01
 ===================
 
-  * Added UTF-8 encoding type to @readfromjson function in utils.py for Korean language support (#145)
+  * Added UTF-8 encoding type to @readfromfile function in utils.py for Korean language support (#145)
 
 3.19.2 / 2022-06-09
 ===================

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Tests for `json2xml` package."""
+"""Tests for `json2xml` package"""
 
 import json
 from pyexpat import ExpatError
@@ -8,15 +8,12 @@ from pyexpat import ExpatError
 import pytest
 import xmltodict
 
-from json2xml import json2xml
+from json2xml       import json2xml
 from json2xml.utils import (
     InvalidDataError,
-    JSONReadError,
-    StringReadError,
-    readfromjson,
-    readfromstring,
+    StringReadError,    readfromstring,
+    FileReadError,      readfromfile,
 )
-
 
 class TestJson2xml:
     """Tests for `json2xml` package."""
@@ -29,24 +26,24 @@ class TestJson2xml:
 
     def test_read_from_json(self) -> None:
         """Test something."""
-        data = readfromjson("examples/bigexample.json")
+        data        = readfromfile("examples/bigexample.json")
         if isinstance(data, list):
             # it's json array, so we just take the first element and check it's type
             assert isinstance(data[0], dict)
         else:
-            data = readfromjson("examples/licht.json")
+            data    = readfromfile("examples/licht.json")
             assert isinstance(data, dict)
 
     def test_read_from_invalid_json(self) -> None:
-        """Test something."""
-        with pytest.raises(JSONReadError) as pytest_wrapped_e:
-            readfromjson("examples/licht_wrong.json")
-        assert pytest_wrapped_e.type == JSONReadError
+        """Test something"""
+        with pytest.raises(FileReadError) as pytest_wrapped_e:
+            readfromfile("examples/licht_wrong.json")
+        assert pytest_wrapped_e.type == FileReadError
 
     def test_read_from_invalid_json2(self) -> None:
-        with pytest.raises(JSONReadError) as pytest_wrapped_e:
-            readfromjson("examples/wrongjson.json")
-        assert pytest_wrapped_e.type == JSONReadError
+        with pytest.raises(FileReadError) as pytest_wrapped_e:
+            readfromfile("examples/wrongjson.json")
+        assert pytest_wrapped_e.type == FileReadError
 
     def test_read_from_jsonstring(self) -> None:
         data = readfromstring(
@@ -172,22 +169,22 @@ class TestJson2xml:
         assert pytest_wrapped_e.type == InvalidDataError
 
     def test_read_boolean_data_from_json(self) -> None:
-        """Test correct return for boolean types."""
-        data = readfromjson("examples/booleanjson.json")
-        result = json2xml.Json2xml(data).to_xml()
-        dict_from_xml = xmltodict.parse(result)
-        assert dict_from_xml["all"]["boolean"]["#text"] != 'True'
-        assert dict_from_xml["all"]["boolean"]["#text"] == 'true'
+        """test correct return for boolean types"""
+        data            = readfromfile("examples/booleanjson.json")
+        result          = json2xml.Json2xml(data).to_xml()
+        dict_from_xml   = xmltodict.parse(result)
+        assert dict_from_xml["all"]["boolean"]["#text"]                                                 != 'True'   # why Capital?
+        assert dict_from_xml["all"]["boolean"]["#text"]                                                 == 'true'
         assert dict_from_xml["all"]["boolean_dict_list"]["item"][0]["boolean_dict"]["boolean"]["#text"] == 'true'
         assert dict_from_xml["all"]["boolean_dict_list"]["item"][1]["boolean_dict"]["boolean"]["#text"] == 'false'
-        assert dict_from_xml["all"]["boolean_list"]["item"][0]["#text"] == 'true'
-        assert dict_from_xml["all"]["boolean_list"]["item"][1]["#text"] == 'false'
+        assert dict_from_xml["all"]["boolean_list"]     ["item"][0]["#text"]                            == 'true'
+        assert dict_from_xml["all"]["boolean_list"]     ["item"][1]["#text"]                            == 'false'
 
     def test_read_boolean_data_from_json2(self) -> None:
-        """Test correct return for boolean types."""
-        data = readfromjson("examples/booleanjson2.json")
-        result = json2xml.Json2xml(data).to_xml()
-        dict_from_xml = xmltodict.parse(result)
+        """test correct return for boolean types"""
+        data            = readfromfile("examples/booleanjson2.json")
+        result          = json2xml.Json2xml(data).to_xml()
+        dict_from_xml   = xmltodict.parse(result)
         assert dict_from_xml["all"]["boolean_list"]["item"][0]["#text"] != 'True'
         assert dict_from_xml["all"]["boolean_list"]["item"][0]["#text"] == 'true'
         assert dict_from_xml["all"]["boolean_list"]["item"][1]["#text"] == 'false'

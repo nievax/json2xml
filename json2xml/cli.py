@@ -39,26 +39,22 @@ Examples:
     # Use XPath 3.1 format
     json2xml-py -x data.json
 """
-from __future__ import annotations
+
+from __future__         import annotations
 
 import argparse
 import sys
-from typing import Any
-
-from json2xml import __version__
-from json2xml.json2xml import Json2xml
-from json2xml.utils import (
-    JSONReadError,
-    StringReadError,
-    URLReadError,
-    readfromjson,
-    readfromstring,
-    readfromurl,
+from typing             import Any
+from json2xml           import __version__
+from json2xml.json2xml  import Json2xml
+from json2xml.utils     import (
+    StringReadError,    readfromstring,
+    FileReadError,      readfromfile,
+    URLReadError,       readfromurl,
 )
 
 AUTHOR = "Vinit Kumar"
-EMAIL = "mail@vinitkumar.me"
-
+EMAIL  = "mail@vinitkumar.me"
 
 def create_parser() -> argparse.ArgumentParser:
     """Create and configure the argument parser."""
@@ -263,8 +259,8 @@ def read_input(args: argparse.Namespace) -> dict[str, Any] | list[Any]:
             # Read from stdin
             return read_from_stdin()
         try:
-            return readfromjson(args.input_file)
-        except JSONReadError as e:
+            return readfromfile(args.input_file)
+        except FileReadError as e:
             print(f"Error reading JSON file: {e}", file=sys.stderr)
             sys.exit(1)
 

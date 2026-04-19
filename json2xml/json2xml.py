@@ -4,9 +4,9 @@ from typing             import Any
 from defusedxml.minidom import parseString              # for fct to_xml
 from json2xml           import dicttoxml                # for fct to_xml
 from .utils             import InvalidDataError         # for fct to_xml
-from .utils             import readfromjson
+from .utils             import readfromfile
 
-config                  = readfromjson("config.json")
+config                  = readfromfile("config.json")
 active_profile: str     = config["active"]              # 'dspace' or 'custom'
 active_config:  dict    = config[active_profile]
 

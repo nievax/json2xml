@@ -88,26 +88,24 @@ Usage
 
 You can use the json2xml library in the following ways:
 
-
 .. code-block:: python
 
-    from json2xml import json2xml
-    from json2xml.utils import readfromurl, readfromstring, readfromjson
+    from json2xml       import json2xml
+    from json2xml.utils import readfromstring, readfromfile, readfromurl
 
-    # Convert JSON data from a URL to XML
-    data = readfromurl("https://api.publicapis.org/entries")
-    print(json2xml.Json2xml(data).to_xml())
-
-    # Convert a JSON string to XML
+    # convert JSON data from a string to XML
     data = readfromstring(
         '{"login":"mojombo","id":1,"avatar_url":"https://avatars0.githubusercontent.com/u/1?v=4"}'
     )
     print(json2xml.Json2xml(data).to_xml())
 
-    # Convert a JSON file to XML
-    data = readfromjson("examples/licht.json")
+    # convert JSON data from a file   to XML
+    data = readfromfile("examples/licht.json")
     print(json2xml.Json2xml(data).to_xml())
 
+    # convert JSON data from a URL    to XML
+    data = readfromurl("https://api.publicapis.org/entries")
+    print(json2xml.Json2xml(data).to_xml())
 
 Custom Wrappers and Indentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -117,7 +115,7 @@ By default, a wrapper `all` and pretty `True` is set. However, you can easily ch
 .. code-block:: python
 
     from json2xml import json2xml
-    from json2xml.utils import readfromurl, readfromstring, readfromjson
+    from json2xml.utils import readfromurl, readfromstring, readfromfile
 
     data = readfromstring(
         '{"login":"mojombo","id":1,"avatar_url":"https://avatars0.githubusercontent.com/u/1?v=4"}'
@@ -183,7 +181,7 @@ However, you can change this behavior using the item_wrap property like this:
 .. code-block:: python
 
     from json2xml import json2xml
-    from json2xml.utils import readfromurl, readfromstring, readfromjson
+    from json2xml.utils import readfromurl, readfromstring, readfromfile
 
     data = readfromstring('{"my_items":[{"my_item":{"id":1} },{"my_item":{"id":2} }],"my_str_items":["a","b"]}')
     print(json2xml.Json2xml(data, item_wrap=False).to_xml())
@@ -214,7 +212,7 @@ You can also specify if the output XML needs to have type specified or not. Here
  .. code-block:: python
 
      from json2xml import json2xml
-     from json2xml.utils import readfromurl, readfromstring, readfromjson
+     from json2xml.utils import readfromurl, readfromstring, readfromfile
 
      data = readfromstring(
          '{"login":"mojombo","id":1,"avatar_url":"https://avatars0.githubusercontent.com/u/1?v=4"}'

@@ -536,23 +536,19 @@ class TestCLIUnitTests:
         assert "Error reading from URL" in captured.err
 
     def test_read_input_json_file_error(self, capsys: CaptureFixture[str]) -> None:
-        """Test read_input handles JSON file read errors."""
-        from json2xml.utils import JSONReadError
+        """Test read_input handles JSON file read errors"""
+        from json2xml.utils import  FileReadError
 
-        with patch("json2xml.cli.readfromjson") as mock_read:
-            mock_read.side_effect = JSONReadError("File not found")
-
-            args = MagicMock()
-            args.url = None
-            args.string = None
-            args.input_file = "nonexistent.json"
-
+        with patch("json2xml.cli.readfromfile") as mock_read:
+            mock_read.side_effect       = FileReadError("File not found")
+            args                        = MagicMock()
+            args.url                    = None
+            args.string                 = None
+            args.input_file             = "nonexistent.json"
             with pytest.raises(SystemExit) as exc_info:
                 read_input(args)
-
             assert exc_info.value.code == 1
-
-        captured = capsys.readouterr()
+        captured                        = capsys.readouterr()
         assert "Error reading JSON file" in captured.err
 
     def test_read_input_no_input_tty(self, capsys: CaptureFixture[str]) -> None:
