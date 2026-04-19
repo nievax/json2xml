@@ -5,7 +5,7 @@
 ## Quick Start
 
 ```python
-from json2xml import json2xml
+from json2xml       import json2xml
 from json2xml.utils import readfromstring
 
 data = readfromstring('{"name": "John", "age": 30}')
@@ -14,9 +14,9 @@ print(json2xml.Json2xml(data).to_xml())
 
 ## Features
 
-- Conversion from a JSON string to XML
-- Conversion from a JSON file to XML
-- Conversion from an API that emits JSON data to XML
+- Conversion from a JSON string    to XML
+- Conversion from a JSON file      to XML
+- Conversion from a JSON API / URL to XML
 - XPath 3.1 compliant output format (optional)
 - Customizable root element wrapper
 - Optional type attributes on elements
