@@ -9,6 +9,8 @@
 
 - hierarchische CVs testen
 
+- Zielformat def. via .xsd u/o .dtd file (vgl. dspace/controlled vocabularies)
+
 - Architektur verstehen: wie hängen fcts zus.? (vgl. Doku)
 
 - eigene Features einbauen (vgl. sync.py: make_node usw.)
