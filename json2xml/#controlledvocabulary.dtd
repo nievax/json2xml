@@ -1,0 +1,16 @@
+<!--
+    ?:  0 or 1    (optional)
+    *:  0 or more (optional)
+    +:  1 or more (required / mandatory)
+-->
+<!ELEMENT node          (hasNote?, isComposedBy?, isRelatedTo?)>
+<!-- becomes mouseover hint in GUI: -->
+<!ELEMENT hasNote       (#PCDATA)>
+<!ELEMENT isComposedBy  (node+)>
+<!-- never used?: -->
+<!ELEMENT isRelatedTo   (node+)>
+   <!-- CDATA or PCDATA?: -->
+<!ATTLIST node
+            id               NMTOKEN #REQUIRED
+            label            CDATA   #REQUIRED
+            selectable       (true|false) "true">
