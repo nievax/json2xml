@@ -6,7 +6,6 @@ class InvalidDataError(Exception):
     """Raised when the data is invalid."""
     # pass
 
-
 class JSONReadError(   Exception):
     """Raised when there is an error reading JSON data."""
     # pass
