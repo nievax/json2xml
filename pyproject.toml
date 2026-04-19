@@ -1,19 +1,20 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires        = ["setuptools>=42", "wheel"]
+build-backend   =  "setuptools.build_meta"
 
 [project]
-name = "json2xml"
-version = "6.0.4"
-description = "Simple Python Library to convert JSON to XML"
-readme = "README.rst"
+name            = "json2xml"
+version         = "6.0.4"
+description     = "Simple Python Library to convert JSON to XML"
+readme          = "README.rst"
 requires-python = ">=3.10"
-license = { text = "Apache Software License 2.0" }
-keywords = ["json2xml"]
-authors = [
+license         = { text = "Apache Software License 2.0" }
+keywords        = ["json2xml"]
+authors         = [
     { name = "Vinit Kumar", email = "mail@vinitkumar.me" }
 ]
-classifiers = [
+
+classifiers     = [
     "Development Status :: 6 - Mature",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
@@ -27,49 +28,51 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
-dependencies = [
+
+dependencies    = [
     "defusedxml",
     "urllib3",
 ]
 
 [project.urls]
-Homepage = "https://github.com/vinitkumar/json2xml"
+Homepage        = "https://github.com/vinitkumar/json2xml"
 
 [project.scripts]
-json2xml-py = "json2xml.cli:main"
+json2xml-py     = "json2xml.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["json2xml"]
+include         = ["json2xml"]
 
 [project.optional-dependencies]
-dev = [
+dev             = [
     "pytest>=8.4.1",
     "pytest-cov",
     "coverage",
     "setuptools",
     "xmltodict>=0.12.0",
 ]
-fast = ["json2xml-rs>=0.1.0"]
+fast            = ["json2xml-rs>=0.1.0"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-xvs = true
-addopts = "--cov=json2xml --cov-report=xml:coverage/reports/coverage.xml --cov-report=term"
+testpaths       = ["tests"]
+python_files    = ["test_*.py"]
+xvs v           = true
+addopts         = "--cov=json2xml --cov-report=xml:coverage/reports/coverage.xml --cov-report=term"
+
 [tool.ruff]
-exclude = [
+exclude         = [
     ".env",
     ".venv",
     "**/migrations/**",
 ]
-lint.ignore = [
+lint.ignore     = [
     "E501",  # line too long
     "F403",  # 'from module import *' used; unable to detect undefined names
     "E701",  # multiple statements on one line (colon)
     "F401",  # module imported but unused
 ]
-line-length = 119
-lint.select = [
+line-length     = 119
+lint.select     = [
     "I",
     "E",
     "F",
