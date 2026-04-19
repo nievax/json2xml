@@ -6,6 +6,10 @@ class InvalidDataError(Exception):
     """Raised when the data is invalid."""
     # pass
 
+class StringReadError(Exception):
+    """Raised when there is an error reading from a string."""
+    # pass
+
 class JSONReadError(   Exception):
     """Raised when there is an error reading JSON data."""
     # pass
@@ -14,9 +18,14 @@ class URLReadError(    Exception):
     """Raised when there is an error reading from a URL."""
     # pass
 
-class StringReadError(Exception):
-    """Raised when there is an error reading from a string."""
-    # pass
+def readfromstring(       jsondata: str)                        -> dict[str, str]:
+    """Loads JSON data from a string and returns a dictionary."""
+    try:
+        if not isinstance(jsondata, str):
+            raise StringReadError("Input is not a proper JSON string")
+        return json.loads(jsondata)
+    except ValueError as exc:
+            raise StringReadError("Input is not a proper JSON string") from exc
 
 def readfromjson(filename: str)                                 -> dict[str, str]:
     """Reads a JSON file and returns a dictionary."""
@@ -35,12 +44,3 @@ def readfromurl(url: str, params: dict[str, str] | None = None) -> dict[str, str
     if response.status != 200:
         raise URLReadError("URL is not returning correct response")
     return json.loads(response.data.decode('utf-8'))
-
-def readfromstring(       jsondata: str)                        -> dict[str, str]:
-    """Loads JSON data from a string and returns a dictionary."""
-    try:
-        if not isinstance(jsondata, str):
-            raise StringReadError("Input is not a proper JSON string")
-        return json.loads(jsondata)
-    except ValueError as exc:
-            raise StringReadError("Input is not a proper JSON string") from exc
