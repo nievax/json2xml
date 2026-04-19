@@ -32,9 +32,9 @@ def readfromurl(url: str, params: dict[str, str] | None = None) -> dict[str, str
     """Loads JSON data from a URL and returns a dictionary."""
     http     = urllib3.PoolManager()
     response = http.request("GET", url, fields=params)
-    if response.status == 200:
-        return json.loads(response.data.decode('utf-8'))
-    raise URLReadError("URL is not returning correct response")
+    if response.status != 200:
+        raise URLReadError("URL is not returning correct response")
+    return json.loads(response.data.decode('utf-8'))
 
 def readfromstring(       jsondata: str)                        -> dict[str, str]:
     """Loads JSON data from a string and returns a dictionary."""
@@ -43,4 +43,4 @@ def readfromstring(       jsondata: str)                        -> dict[str, str
             raise StringReadError("Input is not a proper JSON string")
         return json.loads(jsondata)
     except ValueError as exc:
-        raise StringReadError("Input is not a proper JSON string") from exc
+            raise StringReadError("Input is not a proper JSON string") from exc
