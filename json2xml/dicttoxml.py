@@ -3,10 +3,6 @@
 
     :param dict obj:
 
-    :param bool use_root:
-        output is wrapped in an XML root element
-        default is True
-
     :param str custom_root:
         specify a custom root element
         default is 'root'
@@ -185,6 +181,7 @@ from decimal            import Decimal
 from fractions          import Fraction
 from random             import SystemRandom
 from typing             import Any, Union, cast
+from json2xml           import Json2xml
 
 from defusedxml.minidom import parseString
 
@@ -403,6 +400,22 @@ def open_tag( tag_name: str, attrs: str = '')                       -> str:
     '''docstring'''
     return                    '<'     + tag_name + distance(attrs) + attrs + '>'
 
+
+    # TODO
+    # def open_tag( tagname: str, attributes: dict|None = None, cont:    str = '') -> str:
+    #     '''open tag string'''
+    #     attribute_strings           = ""
+    #     if  attributes is not None:
+    #         for key, value in attributes.items():
+    #             attribute_strings  +=  ' ' + key + '="' + value + '"'
+    #     opening_symbol              =  '<'
+    #     if  cont != '':
+    #         closing_symbol          =  '>'
+    #     else:   # cont == '' / empty is True:
+    #         closing_symbol          = '/>'
+    #     return '       '    + opening_symbol + tagname + attribute_strings  + closing_symbol
+
+
 def close_tag(tag_name: str)                                        -> str:
     '''docstring'''
     return                    '</'    + tag_name                           + '>'
@@ -416,6 +429,18 @@ def make_tag( tag_name: str, attrs: str = '', content: str = '')    -> str:
     else:   # content == ''
         return_value        = '<'     + tag_name + distance(attrs) + attrs + '/>'
     return return_value
+
+    # TODO
+    # def make_node(tagname: str, attributes: dict|None = None, content: str = '') -> str:
+    #     '''generate a tag string'''
+    #     if  content     != '':
+    #         element     = open_tag(  tagname, attributes, content)  + line_break    \
+    #                     + content                                   + line_break    \
+    #                     + close_tag( tagname)                       + line_break
+    #     else:   # content == ""
+    #         element     = open_tag(  tagname, attributes)           + line_break    # empty_tag
+    #     return element
+
 
 # ##############################################
 
@@ -532,7 +557,7 @@ def dict2xml_str(
              subtree      = escape_xml(     rawitem)
     else:
         # we can not use convert_dict, because rawitem could be non-dict
-             subtree      = convert(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
+             subtree      = convert(bundle,
                                     rawitem,
                                     ids,
                                     item_name,
@@ -576,7 +601,7 @@ def list2xml_str(
         flat      = False
     subtree = ""           # Initialize subtree with default empty string
     subtree = convert_list(
-        make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
+        bundle,
         item,
         ids,
         item_name,
@@ -594,7 +619,7 @@ def list2xml_str(
 
 # ##############################################
 
-# TODO understand
+# TODO understan; main fct:
 def convert(
     bundle:                 dict[str, Any],
     obj:                    ELEMENT,
@@ -628,11 +653,9 @@ def convert(
         case None:
             return_name = convert_none(  item_name,                  attr_type,     cdata=cdata)
         case dict():
-            return_name = convert_dict(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
-                              cast("dict[str, Any]", obj), ids, parent)
+            return_name = convert_dict(bundle, cast("dict[str, Any]", obj), ids, parent)
         case Sequence():
-            return_name =convert_list(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
-                              obj,                         ids, parent)
+            return_name = convert_list(bundle, obj,                         ids, parent)
         case _:
             raise TypeError('Unsupported data type: ' + str(obj) + ' (' + type(obj).__name__ + ')' )
     return  return_name
@@ -821,6 +844,10 @@ def set_namespace_str(xml_namespaces: dict[str, Any])               -> str:
 
 def dicttoxml(
     obj:            ELEMENT,
+    bla:            Json2xml,
+)                                                                   -> bytes:
+    '''docstring: see top of file'''
+    # TODO: bundle = bla.bundle ...
     bundle:         dict[str, Any]          = {
                                 'attr_type':                True,   # display data type
                                 'cdata':                    False,  # wrap string values   into CDATA sections
@@ -828,15 +855,13 @@ def dicttoxml(
                                 'array_headers':            False,  # wrap each array item into the outer header (see also wrap_array_items) 
     },
     xpath_format:        bool               = False,                # default is False
-    use_root:            bool               = True,                 # default is True;  wrap the output into an XML root element
     custom_root:         str                = "root",               # default is "root"; TODO or better use custom_root?
     # wrap_array_items:   bool                = True,               # default is True;  wrap each array item into a tag
     # array_items_wrap:   Callable[[str], str]= default_item_func,  # default is default_item_func; how to generate the tag for each array item; TODO does NOT come from json2xml
     only_read_folder:    str                = "",
     ids:            list[int]      | None   = None,                 # default is None;  elements get unique ids; default is list[str]
     xml_namespaces: dict[str, Any] | None   = None,                 # default is None
-)                                                                   -> bytes:
-    '''docstring: see top of file'''
+
     output                                  = ''
     attr_type:              bool            = bundle['attr_type']
     cdata:                  bool            = bundle['cdata']
@@ -850,15 +875,13 @@ def dicttoxml(
         output              = set_xpath(obj)
     else:
         namespace_str       = set_namespace_str(xml_namespaces)
-        if  use_root is False:                    # TODO instead of this, integrate it into fct as default value:
+        if  custom_root == '':                    # TODO instead of this, integrate it into fct as default value:
             if  only_read_folder:       #      != ''
                 custom_root = only_read_folder
-            else:       # if  only_read_folder == ''
+            else:       #  if only_read_folder == ''
                 custom_root = 'root'    # custom root is needed in every case ...
                                         # ... to prevent ExpatError / InvalidDataError in json2xml.py / fct to_xml()
-        output_elem         = convert(make_bundle(attr_type, cdata, custom_array_item_wrap, array_headers),
-                                      obj,
-                                      ids,
-                                      custom_root)
+        # main fct:
+        output_elem         = convert(bundle, obj, ids, custom_root)
         output              = PROLOG + make_tag(custom_root, namespace_str, output_elem)
     return ''.join(output).encode('utf-8')

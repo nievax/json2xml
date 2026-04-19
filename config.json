@@ -7,9 +7,7 @@
                 "pretty"                    : true,
                 "xpath_format"              : false,
 
-                "use_root"                  : false,
                 "custom_root"               : "isComposedBy",
-
                 "custom_array_item_wrap"    : "node",
                 "attr_type"                 : false,
                 "cdata"                     : false,
@@ -24,9 +22,7 @@
                 "pretty"                    : true,
                 "xpath_format"              : true,
 
-                "use_root"                  : true,
                 "custom_root"               : "root",
-
                 "custom_array_item_wrap"    : "alpen",
                 "attr_type"                 : true,
                 "cdata"                     : true,

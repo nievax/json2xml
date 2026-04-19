@@ -13,10 +13,10 @@ active_config:  dict    = config[active_profile]
 class Json2xml:
     """Wrapper class to convert the data to xml"""
 
-    def __init__(
-        self,
-        data:           dict[str, Any] | list[Any] | None   = None,
-    ):
+    def __init__(self, data:   dict[str, Any] | list[Any] | None = None,):
+        # TODO only (active) config weitergeben?
+
+        # TODO self.bundle          = ...
         self.data                   = data
         self.only_read_folder       =        config["only_read_folder"]         # str           default is ""
         self.not_read_folder        =        config["not_read_folder"]          # str           default is ""
@@ -24,12 +24,10 @@ class Json2xml:
         self.pretty                 = active_config["pretty"]                   # bool          default is True;  new lines + indenting; False gives no string, but bytes
         self.xpath_format           = active_config["xpath_format"]             # bool          default is False
 
-        self.use_root               = active_config["use_root"]                 # bool          default is True;  the output is wrapped into an XML root element
-        self.custom_root            = active_config["custom_root"]              # str           default is "root"
-
-        # self.wrap_array_items       = active_config["wrap_array_items"]       # bool          default is True;  wrap each array item  into a tag;                 TODO use for DS?
+        self.custom_root            = active_config["custom_root"]              # str           default is "root"; wrap output          into a root element, except ""
+        # self.wrap_array_items       = active_config["wrap_array_items"]       # bool          default is True;   wrap each array item into a tag;                 TODO use for DS?
         # self.array_items_wrap       = array_items_wrap,                       # fct           default is default_item_func / "item";                              TODO make this work
-        self.custom_array_item_wrap = active_config["custom_array_item_wrap"]   # str           wrap each array item into this tag, except ""
+        self.custom_array_item_wrap = active_config["custom_array_item_wrap"]   # str           default is "";     wrap each array item into this tag,       except ""
 
         self.array_headers          = active_config["array_headers"]            # bool          default is False; repeat the outer header for each array element;   TODO use for DS?
         self.attr_type              = active_config["attr_type"]                # bool          default is True;  display data type
@@ -41,7 +39,7 @@ class Json2xml:
                                                                                 #                                   }
                                                                                 #                           }
 
-    def exclude(self, dictio: dict, not_read_folder: str)                        -> dict:
+    def exclude( self, dictio: dict[str, Any], not_read_folder: str)              -> dict:
         '''substract folder from dict'''
         smaller_dict:  dict = {}
         for     element in dictio:
@@ -49,32 +47,33 @@ class Json2xml:
                 smaller_dict[element] = dictio[element]
         return  smaller_dict
 
-    def to_xml(self) -> Any | None:
+    def to_xml(  self)                                                            -> Any | None:
         """Convert to xml"""
         if  self.data:
             # TODO this is only necessary for self.pretty!:
             content                             = self.data
             if   isinstance(self.data, dict):
-                if      self.only_read_folder  != "":
+                if      self.only_read_folder   # != "":
                     if  self.only_read_folder  in              self.data:
                         content                 =              self.data[self.only_read_folder]
-                elif    self.not_read_folder   != "":
+                elif    self.not_read_folder    # != "":
                         content                 = self.exclude(self.data, self.not_read_folder)
             xml_data = dicttoxml.dicttoxml(
                 content,
-                bundle                          = { 'attr_type':                self.attr_type,
-                                                    'cdata':                    self.cdata,
-                                                    'custom_array_item_wrap':   self.custom_array_item_wrap,
-                                                    'array_headers':            self.array_headers,
-                                                    },
-                xpath_format                    = self.xpath_format,
-                use_root                        = self.use_root,
-                custom_root                     = self.custom_root,
-                # wrap_array_items              = self.wrap_array_items,
-                # array_items_wrap              = self.array_items_wrap,
-                ids                             = self.ids,
-                xml_namespaces                  = self.xml_namespaces,
-                only_read_folder                = self.only_read_folder,
+                self,       # TODO or only config?
+
+                # bundle                          = { 'attr_type':                self.attr_type,
+                                                    # 'cdata':                    self.cdata,
+                                                    # 'custom_array_item_wrap':   self.custom_array_item_wrap,
+                                                    # 'array_headers':            self.array_headers,
+                                                    # },
+                # xpath_format                    = self.xpath_format,
+                # custom_root                     = self.custom_root,
+                # # wrap_array_items              = self.wrap_array_items,
+                # # array_items_wrap              = self.array_items_wrap,
+                # ids                             = self.ids,
+                # xml_namespaces                  = self.xml_namespaces,
+                # only_read_folder                = self.only_read_folder,
             )
             if self.pretty:
                 try:

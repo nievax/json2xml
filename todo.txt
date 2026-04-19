@@ -1,3 +1,10 @@
+- fct.s-Namen kürzen: bla = blub
+
+- in dicttoxml: --init()-- und read_config()
+    - wofür dann noch json2xml.py?
+
+- dicttoxml umbenennen: gilt nur für dict?
+
 - array_headers testen in Kombi mit wrap_array_items
 
 - hierarchische CVs testen
@@ -16,4 +23,4 @@
 
 - Doku updaten
 
-- nachziehen / anpassen: cli.py, _fast.py, ...
+- nachziehen / anpassen: cli.py, _fast.py, ... oder löschen
